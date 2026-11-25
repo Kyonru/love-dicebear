@@ -26,3 +26,4 @@ Generated from the pinned upstream definitions. Artwork licenses are independent
 | `dogs` | DiceBear | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/dogs.json) |
 | `dylan` | Natalia Spivak | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/dylan.json) |
 | `fun-emoji` | Davis Uche | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/fun-emoji.json) |
+| `gaze` | DiceBear | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/gaze.json) |
