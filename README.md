@@ -50,6 +50,12 @@ renderers, **S** saves PNG in HTTP mode or SVG in local mode, and **Enter** retr
 or forces an HTTP refresh. `--cache` opts into a one-day disk cache; it is off by
 default. Switching back to the local renderer requires love-thorvg to be installed.
 
+The example also shows clickable rendering controls. **C** toggles disk caching,
+**T** cycles its lifetime (5 minutes, 1 hour, or 24 hours), **Enter** refreshes
+from the server, and **Delete** clears the current URL from the cache while
+keeping the preview. The panel reports whether the image came from the network
+or disk cache. Cache controls become available in HTTP mode.
+
 No `npm install` is needed to launch: the dev script uses Node's built-in APIs.
 Run `npm ci --ignore-scripts` when you want the JavaScript reference used by
 `npm test`. For a previously downloaded release ZIP, set `LOVE_THORVG_ARCHIVE`

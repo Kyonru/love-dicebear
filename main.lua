@@ -10,6 +10,8 @@ local variants = dicebear.describe('bottts').options.eyesVariant.values
 local renderer = 'thorvg'
 local requested, pending, statusMessage, smoke
 local cacheEnabled, forceRefresh = false, false
+local lifetimes = {{label = '5 minutes', seconds = 300}, {label = '1 hour', seconds = 3600}, {label = '24 hours', seconds = 86400}}
+local lifetimeIndex = 3
 local copy = require('love_dicebear.util').copy
 
 local function selectStyle(name)
@@ -91,7 +93,7 @@ function love.update(dt)
     if pending <= 0 then
       pending = nil
       local ok, result = pcall(require('love_dicebear.http').new, styleName, requested, {
-        cache = cacheEnabled, refresh = forceRefresh,
+        cache = cacheEnabled and {ttl = lifetimes[lifetimeIndex].seconds} or false, refresh = forceRefresh,
       })
       if ok then document = result
       else previewNotice = tostring(result) .. '\nEnter: retry' end
@@ -138,10 +140,39 @@ function love.keypressed(key)
   elseif key == 'h' then
     renderer = renderer == 'http' and 'thorvg' or 'http'
     rebuild(requested)
+  elseif key == 'c' and renderer == 'http' then
+    cacheEnabled = not cacheEnabled
+    rebuild(requested)
+  elseif key == 't' and renderer == 'http' and cacheEnabled then
+    lifetimeIndex = lifetimeIndex % #lifetimes + 1
+    rebuild(requested)
+  elseif key == 'delete' and renderer == 'http' and document and document:getStatus() == 'ready' then
+    local ok, message = require('love_dicebear.http').clearCache(document.url)
+    statusMessage = ok and 'Cached avatar cleared; preview kept.' or (message or 'Could not clear cache')
   elseif key == 'return' and renderer == 'http' then
     rebuild(requested)
     forceRefresh = true
   elseif key == 'escape' then love.event.quit() end
+end
+
+-- Share the same actions and enabled states between mouse and keyboard controls.
+local function controls()
+  local remote = renderer == 'http'
+  return {
+    {key = 'h', label = 'H  Renderer: ' .. (remote and 'HTTP PNG' or 'Local SVG'), enabled = true},
+    {key = 'c', label = 'C  Disk cache: ' .. (cacheEnabled and 'On' or 'Off'), enabled = remote},
+    {key = 't', label = 'T  Cache lifetime: ' .. lifetimes[lifetimeIndex].label, enabled = remote and cacheEnabled},
+    {key = 'return', label = 'Enter  Refresh from server', enabled = remote},
+    {key = 'delete', label = 'Delete  Clear this URL from cache', enabled = remote and document and document:getStatus() == 'ready'},
+  }
+end
+
+function love.mousepressed(x, y, button)
+  if button ~= 1 or not state or x < 320 or x > 728 then return end
+  for i, control in ipairs(controls()) do
+    local top = 60 + (i - 1) * 40
+    if y >= top and y <= top + 32 and control.enabled then love.keypressed(control.key); return end
+  end
 end
 
 function love.draw()
@@ -155,6 +186,25 @@ function love.draw()
     love.graphics.printf(previewNotice or '', 48, 90, 224, 'center')
     love.graphics.setColor(1, 1, 1)
   end
+  love.graphics.print('Rendering options', 320, 32)
+  local mx, my = love.mouse.getPosition()
+  for i, control in ipairs(controls()) do
+    local top = 60 + (i - 1) * 40
+    local hover = control.enabled and mx >= 320 and mx <= 728 and my >= top and my <= top + 32
+    love.graphics.setColor(hover and 0.25 or 0.16, hover and 0.29 or 0.18, hover and 0.34 or 0.22)
+    love.graphics.rectangle('fill', 320, top, 408, 32, 4, 4)
+    local shade = control.enabled and 1 or 0.55
+    love.graphics.setColor(shade, shade, shade)
+    love.graphics.print(control.label, 332, top + 8)
+  end
+  love.graphics.setColor(1, 1, 1)
+  local detail = 'Local generation. Switch to HTTP for cache options.'
+  if renderer == 'http' then
+    local source = document and document:getSource()
+    detail = source and ('Image source: ' .. (source == 'cache' and 'disk cache' or 'network')) or 'Waiting for image…'
+    if document and document:getCacheError() then detail = detail .. '\nCache: ' .. document:getCacheError() end
+  end
+  love.graphics.printf(detail, 320, 266, 408)
   love.graphics.print(styleName .. ' / ' .. ((description.meta.creator or {}).name or 'Unknown'), 32, 310)
   love.graphics.print('Up/Down: style    Left/Right: variant    R: new', 32, 338)
   local source = renderer

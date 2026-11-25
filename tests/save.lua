@@ -2,7 +2,7 @@
 local dicebear = require('love_dicebear')
 local oldLove, oldAdapter = love, package.loaded['love_dicebear.thorvg']
 local oldHttp = package.loaded['love_dicebear.http']
-local saved, settings, savedPath, lastRequest
+local saved, settings, savedPath, lastRequest, clearedUrl
 local ok, message = pcall(function()
   love = {
     window = {setTitle = function() end},
@@ -22,8 +22,8 @@ local ok, message = pcall(function()
   end}
   package.loaded['love_dicebear.http'] = {new = function(style, input, config)
     assert(style == 'initials' and input.seed == 'hello-love')
-    assert(config.cache == true)
-    lastRequest = {config = config, status = 'loading'}
+    assert(config.cache == false or type(config.cache) == 'table')
+    lastRequest = {config = config, status = 'loading', url = 'https://example.test/avatar.png'}
     function lastRequest:update() self.status = 'ready'; return self.status end
     function lastRequest:getStatus() return self.status end
     function lastRequest:getSource() return 'cache' end
@@ -32,7 +32,7 @@ local ok, message = pcall(function()
     end
     function lastRequest:release() self.released = true end
     return lastRequest
-  end}
+  end, clearCache = function(url) clearedUrl = url; return true end}
   assert(loadfile('main.lua'))()
   love.load({})
   love.keypressed('right')
@@ -62,6 +62,15 @@ local ok, message = pcall(function()
   local previous = lastRequest
   love.keypressed('return'); love.update(0.21)
   assert(previous.released and lastRequest.config.refresh, 'refresh did not replace the previous request')
+  assert(lastRequest.config.cache.ttl == 86400)
+  love.keypressed('t'); love.update(0.21)
+  assert(lastRequest.config.cache.ttl == 300, 'TTL control did not apply')
+  love.mousepressed(330, 108, 1); love.update(0.21)
+  assert(lastRequest.config.cache == false, 'cache button did not disable caching')
+  love.keypressed('c'); love.update(0.21)
+  assert(lastRequest.config.cache.ttl == 300, 'cache toggle forgot TTL')
+  love.keypressed('delete')
+  assert(clearedUrl == lastRequest.url and not lastRequest.released, 'clear cache discarded preview or used wrong URL')
   previous = lastRequest
   love.keypressed('h'); love.keypressed('s')
   assert(previous.released and savedPath == 'avatar.svg', 'renderer switch did not release HTTP image or restore SVG saving')
