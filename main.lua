@@ -1,4 +1,4 @@
--- Small integration example. Copy love_thorvg/ beside this file to run it.
+-- Catalog example: local ThorVG or optional HTTP PNG rendering.
 local dicebear = require('love_dicebear')
 local document, state, variantIndex
 local styleName, styleIndex = 'bottts', 1
@@ -7,6 +7,10 @@ local part = 'eyes'
 local previewNotice
 local description = dicebear.describe(styleName)
 local variants = dicebear.describe('bottts').options.eyesVariant.values
+local renderer = 'thorvg'
+local requested, pending, statusMessage, smoke
+local cacheEnabled, forceRefresh = false, false
+local copy = require('love_dicebear.util').copy
 
 local function selectStyle(name)
   description = dicebear.describe(name)
@@ -26,8 +30,12 @@ end
 
 local function rebuild(options)
   local nextDocument, nextState
-  previewNotice = require('love_dicebear.thorvg_support')[styleName]
-  if previewNotice then
+  requested, pending, statusMessage, forceRefresh = copy(options), nil, nil, false
+  previewNotice = renderer == 'thorvg' and require('love_dicebear.thorvg_support')[styleName] or nil
+  if renderer == 'http' then
+    nextState = dicebear.resolve(styleName, options)
+    pending, previewNotice = 0.2, 'Downloading PNG…'
+  elseif previewNotice then
     nextState = dicebear.resolve(styleName, options)
   else
     nextDocument, nextState = require('love_dicebear.thorvg').new(
@@ -40,10 +48,17 @@ local function rebuild(options)
 end
 
 function love.load(args)
+  if args[1] == '--http-test' then
+    smoke = require('tests.http_live').new()
+    return
+  end
   if args[1] == '--test' or args[1] == '--render-test' or args[1] == '--catalog-render-test' or args[1] == '--parity' then
     local ok, err = pcall(function()
       require('tests.run')
       require('tests.adapter')
+      require('tests.http_url')
+      require('tests.http')
+      require('tests.http_worker')
       if args[1] == '--render-test' then require('tests.render')() end
       if args[1] == '--catalog-render-test' then require('tests.catalog_render')() end
       if args[1] == '--parity' then
@@ -57,10 +72,38 @@ function love.load(args)
   end
   for i, arg in ipairs(args) do
     if arg == '--style' then styleName = assert(args[i + 1], '--style requires a name') end
+    if arg == '--renderer' then
+      renderer = args[i + 1]
+      assert(renderer == 'thorvg' or renderer == 'http', '--renderer must be thorvg or http')
+    end
+    if arg == '--cache' then cacheEnabled = true end
   end
   selectStyle(styleName)
   love.window.setTitle('love-dicebear / Style catalog')
   rebuild({seed = 'hello-love', backgroundColor = 'e8edf2', borderRadius = 12})
+end
+
+function love.update(dt)
+  if smoke then smoke:update(dt); return end
+  if renderer ~= 'http' then return end
+  if pending then
+    pending = pending - dt
+    if pending <= 0 then
+      pending = nil
+      local ok, result = pcall(require('love_dicebear.http').new, styleName, requested, {
+        cache = cacheEnabled, refresh = forceRefresh,
+      })
+      if ok then document = result
+      else previewNotice = tostring(result) .. '\nEnter: retry' end
+    end
+  end
+  if document then
+    local status = document:update()
+    if status == 'error' then previewNotice = document:getError():sub(1, 180) .. '\nEnter: retry'
+    elseif status == 'queued' then previewNotice = 'Waiting for the previous download…'
+    elseif status == 'loading' then previewNotice = 'Downloading PNG…'
+    elseif status == 'ready' then previewNotice = nil end
+  end
 end
 
 function love.keypressed(key)
@@ -68,9 +111,10 @@ function love.keypressed(key)
   if key == 'right' or key == 'left' then
     if #variants == 0 then return end
     variantIndex = (variantIndex - 1 + (key == 'right' and 1 or -1)) % #variants + 1
-    state[part .. 'Variant'] = variants[variantIndex]
-    state[part .. 'Probability'] = 100
-    rebuild(state)
+    local edited = copy(requested)
+    edited[part .. 'Variant'] = variants[variantIndex]
+    edited[part .. 'Probability'] = 100
+    rebuild(edited)
   elseif key == 'up' or key == 'down' then
     local seed = state.seed
     styleIndex = (styleIndex - 1 + (key == 'down' and 1 or -1)) % #styles + 1
@@ -79,9 +123,24 @@ function love.keypressed(key)
   elseif key == 'r' then
     rebuild({seed = tostring(love.timer.getTime()), backgroundColor = 'e8edf2', borderRadius = 12})
   elseif key == 's' then
-    local svg = dicebear.generate(styleName, state)
-    assert(love.filesystem.write('avatar.svg', svg))
-    print('Saved ' .. love.filesystem.getSaveDirectory() .. '/avatar.svg')
+    local filename, ok, message
+    if renderer == 'http' then
+      filename = 'avatar.png'
+      if document then ok, message = document:save(filename)
+      else message = 'PNG is not ready to save' end
+    else
+      filename = 'avatar.svg'
+      local svg = dicebear.generate(styleName, state)
+      ok, message = love.filesystem.write(filename, svg)
+    end
+    statusMessage = ok and ('Saved ' .. filename) or (message or 'Save failed')
+    if ok then print('Saved ' .. love.filesystem.getSaveDirectory() .. '/' .. filename) end
+  elseif key == 'h' then
+    renderer = renderer == 'http' and 'thorvg' or 'http'
+    rebuild(requested)
+  elseif key == 'return' and renderer == 'http' then
+    rebuild(requested)
+    forceRefresh = true
   elseif key == 'escape' then love.event.quit() end
 end
 
@@ -90,15 +149,18 @@ function love.draw()
   love.graphics.clear(0.08, 0.09, 0.11)
   love.graphics.setColor(1, 1, 1)
   love.graphics.rectangle('fill', 32, 32, 256, 256)
-  if document then document:draw(32, 32)
+  if document and not previewNotice then document:draw(32, 32)
   else
     love.graphics.setColor(0.15, 0.15, 0.15)
-    love.graphics.printf(previewNotice, 48, 110, 224, 'center')
+    love.graphics.printf(previewNotice or '', 48, 90, 224, 'center')
     love.graphics.setColor(1, 1, 1)
   end
   love.graphics.print(styleName .. ' / ' .. ((description.meta.creator or {}).name or 'Unknown'), 32, 310)
-  love.graphics.print('Up / Down: style    Left / Right: variant    R: new    S: save', 32, 338)
-  love.graphics.print(part and (part .. ': ' .. tostring(state[part .. 'Variant'])) or '', 32, 366)
+  love.graphics.print('Up/Down: style    Left/Right: variant    R: new', 32, 338)
+  local source = renderer
+  if renderer == 'http' and document and document:getSource() == 'cache' then source = 'http / cached' end
+  love.graphics.print('H: renderer (' .. source .. ')    S: save ' .. (renderer == 'http' and 'PNG' or 'SVG'), 32, 366)
+  love.graphics.print(statusMessage or (part and (part .. ': ' .. tostring(state[part .. 'Variant'])) or ''), 32, 394)
 end
 
 function love.quit() if document then document:release() end end

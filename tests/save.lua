@@ -1,15 +1,16 @@
 -- Exercise the example's S key, including LÖVE's optional byte-count argument.
 local dicebear = require('love_dicebear')
 local oldLove, oldAdapter = love, package.loaded['love_dicebear.thorvg']
-local saved, settings
+local oldHttp = package.loaded['love_dicebear.http']
+local saved, settings, savedPath, lastRequest
 local ok, message = pcall(function()
   love = {
     window = {setTitle = function() end},
     filesystem = {
       write = function(path, data, size)
         assert(size == nil, 'save passed resolved settings as the byte count')
-        assert(path == 'avatar.svg')
-        saved = data
+        assert(path == 'avatar.svg' or path == 'avatar.png')
+        saved, savedPath = data, path
         return true
       end,
       getSaveDirectory = function() return '/example-save-directory' end,
@@ -18,6 +19,19 @@ local ok, message = pcall(function()
   package.loaded['love_dicebear.thorvg'] = {new = function(style, input)
     settings = dicebear.resolve(style, input)
     return {release = function() end}, settings
+  end}
+  package.loaded['love_dicebear.http'] = {new = function(style, input, config)
+    assert(style == 'initials' and input.seed == 'hello-love')
+    assert(config.cache == true)
+    lastRequest = {config = config, status = 'loading'}
+    function lastRequest:update() self.status = 'ready'; return self.status end
+    function lastRequest:getStatus() return self.status end
+    function lastRequest:getSource() return 'cache' end
+    function lastRequest:save(path)
+      assert(self.status == 'ready'); return love.filesystem.write(path, 'PNG bytes')
+    end
+    function lastRequest:release() self.released = true end
+    return lastRequest
   end}
   assert(loadfile('main.lua'))()
   love.load({})
@@ -39,7 +53,20 @@ local ok, message = pcall(function()
   local nextStyle
   for i, name in ipairs(names) do if name == 'initials' then nextStyle = names[i % #names + 1] end end
   assert(saved == dicebear.generate(nextStyle, settings), 'style navigation retained stale settings')
+  love.load({'--renderer', 'http', '--style', 'initials', '--cache'})
+  love.keypressed('s')
+  assert(savedPath == 'avatar.svg', 'saving before download completion wrote a file')
+  love.update(0.21)
+  love.keypressed('s')
+  assert(savedPath == 'avatar.png' and saved == 'PNG bytes', 'HTTP mode did not save PNG')
+  local previous = lastRequest
+  love.keypressed('return'); love.update(0.21)
+  assert(previous.released and lastRequest.config.refresh, 'refresh did not replace the previous request')
+  previous = lastRequest
+  love.keypressed('h'); love.keypressed('s')
+  assert(previous.released and savedPath == 'avatar.svg', 'renderer switch did not release HTTP image or restore SVG saving')
 end)
 love, package.loaded['love_dicebear.thorvg'] = oldLove, oldAdapter
+package.loaded['love_dicebear.http'] = oldHttp
 assert(ok, message)
 print('PASS: example saves the edited avatar with the correct write arguments')
