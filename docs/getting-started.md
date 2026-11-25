@@ -51,7 +51,9 @@ files or hot-reload; restart it after editing Lua.
 
 ## Install in your game
 
-Copy `love_dicebear.lua` and `love_dicebear/` into your game's root. Keep `THIRD_PARTY.md`,
+Download the versioned library ZIP from [GitHub Releases](https://github.com/Kyonru/love-dicebear/releases)
+and extract it, or use a source checkout. Copy `love_dicebear.lua` and
+`love_dicebear/` into your game's root. Keep `THIRD_PARTY.md`,
 `STYLES.md`, `vendor/DICEBEAR-LICENSE`, `vendor/UNICODE-LICENSE`, and `LICENSE`
 with distributed copies. The raw JSON,
 scripts, tests, and Node development dependencies are not needed at runtime.
@@ -79,3 +81,21 @@ with Lua 5.4 and LÖVE 11.5 on macOS ARM64. It does not change `math.random` sta
 Use `dicebear.styles()` to list the available names. Each module loads lazily:
 generating one style does not load the other artwork. Changing styles is simply
 `dicebear.generate('lorelei', {seed = 'player-42'})`.
+
+## Release downloads
+
+Choose `love-dicebear-<version>.zip` for the packaged library. The automatically
+provided GitHub source archives contain the full development repository instead.
+The library ZIP is platform-independent and includes all styles, optional adapter
+code, and required license notices. love-thorvg and other optional dependencies
+are not bundled; install them only if your chosen renderer needs them.
+
+Verify the ZIP against the release's `SHA256SUMS` file before extracting it:
+
+```sh
+sha256sum --check SHA256SUMS       # Linux
+shasum -a 256 --check SHA256SUMS   # macOS
+```
+
+On Windows, run `Get-FileHash .\love-dicebear-<version>.zip -Algorithm SHA256`
+in PowerShell and compare the result with `SHA256SUMS`.

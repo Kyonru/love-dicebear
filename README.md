@@ -17,8 +17,12 @@ through the optional HTTP adapter.
 
 ## Install
 
-Copy `love_dicebear.lua` and `love_dicebear/` into your game's root.
+Download `love-dicebear-<version>.zip` from [GitHub Releases](https://github.com/Kyonru/love-dicebear/releases),
+extract it, and copy `love_dicebear.lua` and `love_dicebear/` into your game's root.
+You can also copy those files directly from a source checkout.
 The generator works with Lua 5.1+ and LÖVE 11.x / LuaJIT.
+Release ZIPs contain the library and notices; optional renderer dependencies
+are installed separately. Each release includes `SHA256SUMS` for verification.
 
 Keep `LICENSE`, `THIRD_PARTY.md`, `STYLES.md`, `vendor/DICEBEAR-LICENSE`, and
 `vendor/UNICODE-LICENSE` with distributed copies. Tests, scripts, raw style JSON,

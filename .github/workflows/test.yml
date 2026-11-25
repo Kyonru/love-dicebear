@@ -1,5 +1,9 @@
 name: Test
-on: [push, pull_request]
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_call:
 jobs:
   lua:
     runs-on: ubuntu-latest
@@ -25,3 +29,13 @@ jobs:
         env:
           LUA: ${{ matrix.lua }}
       - run: python3 scripts/import_style.py && git diff --exit-code -- love_dicebear/styles STYLES.md
+
+  release-package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+      - run: sudo apt-get update && sudo apt-get install -y lua5.4
+      - run: python tests/release.py

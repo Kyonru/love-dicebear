@@ -133,6 +133,46 @@ do not edit their generated copies. Pull requests build the docs, and pushes
 to `main` deploy GitHub Pages. See [documentation maintenance](docs/documentation.md)
 for the full publishing setup.
 
+## Package and publish a release
+
+Releases follow the same tag-driven approach as love-thorvg. There is one
+portable archive, because the Lua library does not bundle native dependencies.
+
+1. Set `version` in `love_dicebear/init.lua` to the intended release version.
+2. Update the guides for any API changes and run the relevant tests above.
+3. Validate and inspect a local package (replace `v0.2.0` with your version):
+
+   ```sh
+   python3 tests/release.py
+   python3 scripts/package_release.py --version v0.2.0
+   ```
+
+4. Commit the changes, then push the release commit and matching tag:
+
+   ```sh
+   git push origin main
+   git -c tag.gpgSign=false tag -a v0.2.0 -m "love-dicebear v0.2.0"
+   git push origin v0.2.0
+   ```
+
+The tag must match the Lua version exactly (with a leading `v`). Prerelease tags
+such as `v0.3.0-rc.1` produce GitHub prereleases. Creating the tag publishes a
+release automatically after the full Lua/parity suite and packaging tests pass.
+No release is created by an ordinary branch push.
+
+The packager writes `dist/love-dicebear-<version>.zip` and `dist/SHA256SUMS`.
+The ZIP includes the Lua entry point, all runtime Lua modules and styles,
+required license notices, an installation README, and `VERSION`. Adapter code
+is included, but love-thorvg binaries, curl, tests, examples, source JSON,
+Node dependencies, and development tooling are excluded. Builds use stable
+paths, timestamps, permissions, and ordering for repeatable archives.
+
+The release workflow reuses the test workflow, then verifies the archive
+checksum before uploading it to GitHub Releases with generated release notes.
+Only the publishing job has repository write permissions. Existing releases
+are not overwritten; investigate a failed publication before retrying it.
+Do not move a published tag to different code.
+
 ## Submit changes
 
 Keep changes focused and describe the behavior they change. Include the checks
