@@ -61,12 +61,13 @@ try {
   assert.equal(await page.evaluate(() => window.navigationSentinel), 'same-document');
   const mobile = await context.newPage();
   lastPage = mobile;
+  mobile.on('pageerror', error => errors.push(error.message));
   await mobile.setViewportSize({width: 390, height: 844});
   await mobile.goto(origin + 'api/http/');
   await mobile.waitForFunction(() => typeof document$ !== 'undefined');
   await mobile.screenshot({path: path.join(output, 'http-api-mobile.png'), fullPage: true});
   assert.ok(await mobile.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'mobile page overflows horizontally');
-  await mobile.locator('label[for="__drawer"]').first().click();
+  await mobile.locator('.md-header label[for="__drawer"]').click();
   await mobile.screenshot({path: path.join(output, 'navigation-mobile.png')});
   await mobile.locator('.md-sidebar--primary').getByRole('link', {name: 'Avatar options', exact: true}).click();
   await mobile.locator('article h1').filter({hasText: /^Avatar options/}).waitFor();
