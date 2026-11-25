@@ -18,6 +18,15 @@ const names = process.argv.slice(2);
 const available = readdirSync('vendor').filter(n => n.endsWith('.json')).map(n => n.slice(0,-5)).sort();
 for (const name of names) assert(available.includes(name), `Unknown style: ${name}`);
 let total = 0;
+// The pinned catalog uses schema 2 animation annotations. This library produces
+// static SVGs; Core 10.7.0 validates schema 1, so compare the static projection.
+// Keep the complete, unmodified definition in vendor/ and the Lua style module.
+function staticDefinition(value) {
+  if (Array.isArray(value)) return value.map(staticDefinition);
+  if (value && typeof value === 'object') return Object.fromEntries(
+    Object.entries(value).filter(([key]) => key !== 'animations').map(([key,v]) => [key,staticDefinition(v)]));
+  return value;
+}
 function lua(value) {
   if (typeof value === 'string') return JSON.stringify(value);
   if (typeof value === 'number' || typeof value === 'boolean') return String(value);
@@ -26,7 +35,7 @@ function lua(value) {
 }
 for (const name of names.length ? names : available) {
 const definition = JSON.parse(readFileSync(`vendor/${name}.json`, 'utf8'));
-const style = new Style(definition);
+const style = new Style(staticDefinition(definition));
 const options = name === 'bottts' ? botttsCases(definition) : casesForStyle(definition);
 const cases = options.map(options => ({style:name, options}));
 const directory = mkdtempSync(join(tmpdir(), 'love-dicebear-parity-'));
