@@ -98,19 +98,37 @@ text needs an explicit matching font map and a capable native build; see
 [supplied fonts](thorvg.md#svg-text-and-fonts). The HTTP adapter only accepts the
 default family/weight values and omits them from the URL.
 
+## Animation options
+
+| Option | Accepted values | Default |
+| --- | --- | --- |
+| `animation` | Boolean | `false` |
+| `animationSpeed` | Number or range, `0.01`–`100` | `1` |
+| `animationDelay` | Seconds or range, `-10000`–`10000` | `0` |
+| `animationRespectReducedMotion` | Boolean; exported SVG CSS only | `true` |
+| `<name>Animation` | Boolean | Inherits `animation` |
+| `<name>AnimationSpeed` | Number or range, `0.01`–`100` | Inherits global speed |
+| `<name>AnimationDelay` | Seconds or range, `-10000`–`10000` | Inherits global delay |
+
+For example, `wagAnimation = false` keeps a cat's tail still while its other
+animations run. Speed factors above `1` play faster. Positive delays postpone
+the start; negative delays begin partway through a cycle. Ranges resolve
+deterministically from the seed. Animation controls are local/SVG options;
+the HTTP PNG adapter rejects them. See [native playback](thorvg.md#animation).
+
 ## Compatibility and limits
 
-This release generates **static SVGs for all bundled styles**. Animation
-annotations are preserved in the source but are not played or emitted. Built-in
-artwork gradients and filters are retained; configurable color gradients,
+This release generates static SVGs by default and animated SVGs when animation
+is enabled. Local playback requires love-thorvg 0.3.0; exported SVGs use CSS.
+Built-in artwork gradients and filters are retained; configurable color gradients,
 user-supplied definitions, tag filtering, and ID randomization are not
 implemented. Unsupported or misspelled options
 raise an error. Tags are exposed as editor metadata only. Multiple generated
 SVGs should be loaded as separate documents; inlining them into one DOM can
 collide on artwork IDs.
 
-The supported output is tested byte-for-byte against **DiceBear Core 10.7.0**
-with the pinned style definitions in `vendor/`. For schema 2 definitions with
+Static output is tested byte-for-byte against **DiceBear Core 10.7.0**
+with the pinned style definitions in `vendor/`. For definitions with
 animation annotations, the reference test uses their static projection because
 Core 10.7.0's validator predates those annotations. DiceBear version 9
 seeds and option names are not interchangeable with this API. Store the library

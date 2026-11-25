@@ -1,26 +1,33 @@
-## First stable release
+## Animated avatars and updated renderer
 
-love-dicebear 1.0.0 provides local, deterministic SVG avatar generation in pure
-Lua, with all 63 styles from the bundled DiceBear catalog.
+love-dicebear 2.0.0 includes the released DiceBear 11 catalog and opt-in animation
+for its 21 animated styles. Export browser-compatible SVG keyframes or play them
+locally with love-thorvg 0.3.0 (ThorVG 1.2.0-dev, pinned November 25 revision).
 
-- Customize components, visibility, colors, transforms, and text options.
-- Discover editor controls through style descriptors and reproduce avatars from
-  resolved settings.
-- Bring your own SVG renderer; love-thorvg is optional.
-- Use the optional ThorVG adapter for local previews, or the desktop HTTP adapter
-  for PNG Images, saving, and URL caching.
-- Explore the full settings editor in the source checkout and browse the complete
-  API reference and per-style option documentation.
+- Global and named animation switches, speed, and delay controls.
+- Native pause, play, seek, resize, and reusable textures.
+- SVG font support in the pinned renderer; applications supply licensed fonts.
+- Monthly catalog update PRs and minor releases on merge.
+
+## Upgrade from 1.x
+
+Install the complete love-thorvg 0.3.0 wrapper and matching native library for
+animation and local text. Existing manual renderer installations are preserved
+by the launcher and must be upgraded manually. Animation stays off by default. The HTTP adapter now defaults to `/11.x/`
+to match the bundled catalog; use `baseUrl` to retain a different API version.
+The updated upstream catalog can change artwork and variant selection for a
+saved seed. Preserve the library version with saved avatar settings.
 
 ## Scope and known limitations
 
-Generation produces static SVGs; upstream animation annotations are not played.
+Static output remains covered by byte-for-byte reference tests; animated output
+is covered by timeline and native pixel tests, not full browser pixel parity.
 SVG parity tests compare against DiceBear Core 10.7.0. Keep the library version
 alongside saved settings when reproducibility across upgrades matters.
 
 Renderer compatibility depends on the SVG features it supports. ThorVG text
 styles require a supplied font and an SVG-font-capable build; the launcher's
-pinned love-thorvg v0.2.0 binary does not support font preloading. See the
+pinned love-thorvg v0.3.0 includes font preloading. See the
 [font setup guide](https://kyonru.github.io/love-dicebear/thorvg/#svg-text-and-fonts).
 The HTTP adapter requires desktop LÖVE and curl, follows the API's option limits,
 and needs network access unless a fresh cached PNG is available.

@@ -9,7 +9,7 @@ integration, never a requirement for generation.
 **[Documentation](https://kyonru.github.io/love-dicebear/)** ·
 [Style catalog](STYLES.md) · [Contributing](contribute.md)
 
-- **63 bundled styles**, including Adventurer, Avataaars, Bottts, Lorelei,
+- **Bundled DiceBear styles**, including Adventurer, Avataaars, Bottts, Lorelei,
   Micah, Notionists, Open Peeps, Pixel Art, and Initials.
 - **Local generation** in pure Lua, with no network or Node.js runtime required.
 - **Customizable avatars** with variants, colors, visibility, and transforms.
@@ -64,9 +64,31 @@ See [customization](https://kyonru.github.io/love-dicebear/customization/) and t
 
 SVG generation is independent of rendering. Local previews of `initials` and
 `initial-face` require an explicitly supplied font and a love-thorvg build with
-SVG font preloading (not the published v0.2.0 binary). See the ThorVG guide above.
+SVG font preloading (included in love-thorvg v0.3.0). See the ThorVG guide above.
 HTTP rendering requires desktop LÖVE, `curl`, and access to the configured API,
 unless a fresh cached image is available.
+
+## Animated avatars
+
+Version **2.0.0** adds opt-in animation for the 21 animated styles in DiceBear 11.
+For desktop LÖVE, use **love-thorvg 0.3.0**, powered by **ThorVG 1.2.0-dev**
+(pinned to `7793957774e5b494c07ac77cf555789ce3ae059c`).
+
+```lua
+local avatars = require('love_dicebear.thorvg')
+local avatar = avatars.new('cats', {seed = 'Milo', animation = true})
+function love.update(dt) avatar:update(dt) end
+function love.draw() avatar:draw(32, 32) end
+function love.quit() avatar:release() end
+```
+
+Use `animationSpeed`, `animationDelay`, and named controls such as `wagAnimation`
+to tune playback. SVG export embeds CSS keyframes for browser playback and respects
+reduced-motion preferences by default. In native LÖVE, the application controls
+reduced motion by disabling animation. HTTP PNG previews remain static.
+See the [animation guide](https://kyonru.github.io/love-dicebear/thorvg/#animation).
+
+Try an animated cat with `npm run dev -- --style cats --animate`.
 
 ## Try the example
 

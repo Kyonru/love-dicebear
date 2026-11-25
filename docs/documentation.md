@@ -63,7 +63,7 @@ Each source page has a Lucide `icon` in its front matter; the preparation script
 adds icons to generated pages. A small `sidebar.js` hook preserves desktop menu
 scroll position after the theme mounts each page; Zensical still owns routing.
 
-The preparation script also generates `docs/styles/` from the 63 pinned style
+The preparation script also generates `docs/styles/` from the pinned style
 JSON definitions. Edit the canonical definitions through the normal import
 workflow, not generated documentation. The core API describes shared options;
 these pages enumerate the style-specific choices.

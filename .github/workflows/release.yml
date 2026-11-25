@@ -3,6 +3,9 @@ name: Release
 on:
   push:
     tags: ['v*']
+  pull_request:
+    types: [closed]
+    branches: [main]
 
 permissions:
   contents: read
@@ -13,19 +16,48 @@ concurrency:
 
 jobs:
   test:
+    if: >-
+      github.event_name == 'push' ||
+      (github.event.pull_request.merged == true &&
+       github.event.pull_request.head.repo.full_name == github.repository &&
+       github.event.pull_request.head.ref == 'automation/dicebear-catalog' &&
+       contains(github.event.pull_request.labels.*.name, 'update') &&
+       contains(github.event.pull_request.labels.*.name, 'minor'))
     uses: ./.github/workflows/test.yml
 
   package:
     needs: test
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.14'
+      - name: Select release tag
+        id: version
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          python - <<'PYTHON'
+          import os, re
+          from pathlib import Path
+          if os.environ['EVENT_NAME'] == 'push':
+              tag = os.environ['REF_NAME']
+          else:
+              source = Path('love_dicebear/init.lua').read_text()
+              version = re.search(r"local M = \{version = '(\d+\.\d+\.0)'\}", source)
+              if not version:
+                  raise SystemExit('Catalog release requires a stable minor version')
+              tag = 'v' + version[1]
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('tag=' + tag + '\n')
+          PYTHON
       - name: Validate version and package library
         env:
-          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
         run: python scripts/package_release.py --version "$RELEASE_TAG"
       - uses: actions/upload-artifact@v4
         with:
@@ -49,10 +81,20 @@ jobs:
       - name: Verify downloaded archive
         working-directory: dist
         run: sha256sum --check SHA256SUMS
+      - name: Tag merged catalog release
+        if: github.event_name == 'pull_request'
+        env:
+          RELEASE_TAG: ${{ needs.package.outputs.tag }}
+        run: |
+          git fetch origin "refs/tags/$RELEASE_TAG:refs/tags/$RELEASE_TAG" || {
+            git tag "$RELEASE_TAG" "$GITHUB_SHA"
+            git push origin "refs/tags/$RELEASE_TAG"
+          }
+          test "$(git rev-parse "$RELEASE_TAG^{commit}")" = "$GITHUB_SHA"
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_TAG: ${{ needs.package.outputs.tag }}
         shell: bash
         run: |
           flags=()

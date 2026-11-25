@@ -1,5 +1,5 @@
 {
-  "$schema": "https://cdn.hopjs.net/npm/@dicebear/schema@2.0.1/dist/definition.min.json",
+  "$schema": "https://cdn.hopjs.net/npm/@dicebear/schema@3.0.0/dist/definition.min.json",
   "$comment": "Exported by DiceBear Studio for Figma. https://www.figma.com/community/plugin/1005765655729342787",
   "meta": {
     "license": {
@@ -422,21 +422,6 @@
               "type": "element",
               "attributes": {
                 "d": "M6.5 1A1.5 1.5 0 0 0 5 2.5V3H1.5A1.5 1.5 0 0 0 0 4.5v8A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-8A1.5 1.5 0 0 0 14.5 3H11v-.5A1.5 1.5 0 0 0 9.5 1zm0 1h3a.5.5 0 0 1 .5.5V3H6v-.5a.5.5 0 0 1 .5-.5m1.886 6.914L15 7.151V12.5a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5V7.15l6.614 1.764a1.5 1.5 0 0 0 .772 0M1.5 4h13a.5.5 0 0 1 .5.5v1.616L8.129 7.948a.5.5 0 0 1-.258 0L1 6.116V4.5a.5.5 0 0 1 .5-.5",
-                "fill": {
-                  "type": "color",
-                  "name": "icon"
-                }
-              }
-            }
-          ]
-        },
-        "brightnessHigh": {
-          "elements": [
-            {
-              "name": "path",
-              "type": "element",
-              "attributes": {
-                "d": "M8 11a3 3 0 0 1 0-6 3 3 0 0 1 0 6m0 1a4 4 0 0 0 0-8 4 4 0 0 0 0 8M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5M3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8m10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 0 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0m-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0m9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707M4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708",
                 "fill": {
                   "type": "color",
                   "name": "icon"
@@ -3012,20 +2997,20 @@
     "background": {
       "values": [
         "#9edfdc",
-        "#9fdded",
-        "#a7e0c9",
-        "#aad8f9",
-        "#b7ddb6",
-        "#bbd1fe",
-        "#cbd8a7",
-        "#cecbfb",
-        "#ded2a0",
-        "#e0c5f1",
         "#edcba1",
-        "#eec1e2",
+        "#fac1bc",
+        "#cecbfb",
+        "#aad8f9",
+        "#e0c5f1",
+        "#a7e0c9",
+        "#cbd8a7",
+        "#ded2a0",
         "#f6c5ac",
+        "#bbd1fe",
         "#f7bfcf",
-        "#fac1bc"
+        "#eec1e2",
+        "#9fdded",
+        "#b7ddb6"
       ]
     },
     "icon": {

@@ -1,0 +1,68 @@
+name: Update DiceBear catalog
+
+on:
+  schedule:
+    - cron: '23 9 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: write
+
+concurrency:
+  group: dicebear-catalog-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/checkout@v4
+        with:
+          repository: dicebear/styles
+          ref: main
+          path: .cache/dicebear-upstream
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+      - name: Import catalog and bump minor version
+        run: python scripts/update_catalog.py --upstream .cache/dicebear-upstream
+      - name: Ensure update labels exist
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create update --color 0366d6 --description 'Upstream catalog update' --force
+          gh label create minor --color 0e8a16 --description 'Minor library release on merge' --force
+      - uses: peter-evans/create-pull-request@v8
+        id: pr
+        with:
+          branch: automation/dicebear-catalog
+          base: main
+          delete-branch: true
+          title: 'chore: update DiceBear catalog (minor release)'
+          commit-message: 'chore: update DiceBear catalog and bump minor version'
+          labels: |
+            update
+            minor
+          body: |
+            Updates the vendored DiceBear catalog, generated Lua styles, immutable
+            source links, and library minor version. Removed upstream styles are
+            removed locally as well; review removals and artwork license changes.
+
+            Test and documentation workflows are dispatched on this branch.
+            Review compatibility and wait for checks before merging. Merging this
+            PR publishes the new version after the release checks pass.
+      # GITHUB_TOKEN PR events do not start workflows; dispatch them explicitly.
+      - name: Run checks on the bot branch
+        if: steps.pr.outputs.pull-request-number
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow run test.yml --ref automation/dicebear-catalog
+          gh workflow run docs.yml --ref automation/dicebear-catalog

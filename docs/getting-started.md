@@ -69,7 +69,7 @@ From a source checkout, install LÖVE 11.x and Node.js 22 or newer, then run:
 npm run dev
 ```
 
-The launcher downloads the pinned love-thorvg v0.2.0 package, verifies its
+The launcher downloads the pinned love-thorvg v0.3.0 package, verifies its
 checksum, and starts the example. Existing complete renderer installations are
 preserved. No `npm install` is needed just to launch the example.
 
@@ -87,7 +87,7 @@ SVG-font-capable renderer already installed, try a supplied local font:
 npm run dev -- --style initials --font examples/fonts/Abel-Regular.ttf
 ```
 
-The launcher's pinned v0.2.0 download does not support font preloading. See the
+The launcher's pinned v0.3.0 download supports SVG font preloading. See the
 [ThorVG guide](thorvg.md) for the updated build requirement.
 
 ### Example controls

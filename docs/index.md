@@ -3,7 +3,7 @@ icon: lucide/house
 ---
 # love-dicebear
 Generate customizable [DiceBear](https://www.dicebear.com/) avatars locally in
-Lua and LÖVE. Includes **all 63 styles** from the pinned DiceBear catalog,
+Lua and LÖVE. Includes **the complete pinned DiceBear catalog**,
 including Adventurer, Avataaars, Bottts, Lorelei, Micah, Notionists, Open Peeps,
 Pixel Art, and Initials. See [STYLES.md](styles.md) for the full list and licenses.
 The local generator needs no HTTP requests, Node runtime, native generator,
@@ -14,11 +14,15 @@ adapter for [love-thorvg](https://github.com/Kyonru/love-thorvg). An optional
 HTTP backend downloads PNGs from DiceBear and displays ordinary LÖVE Images.
 
 
+Version **2.0.0** adds [animated avatars](thorvg.md#animation): browser SVG
+keyframes and local playback through love-thorvg **0.3.0**. Animation stays off
+until enabled.
+
 ## Start here
 
 - [Run the example or install the library](getting-started.md).
 - [Build an avatar editor](customization.md) using introspected options and saved state.
-- [Look up supported options](options.md) and [all 63 styles](styles.md).
+- [Look up supported options](options.md) and [all bundled styles](styles.md).
 
 ## Choose a rendering path
 

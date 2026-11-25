@@ -51,11 +51,12 @@ class ReleaseTests(unittest.TestCase):
             bundle.extractall(self.base / "extracted")
         lua = shutil.which("lua") or shutil.which("lua5.4") or shutil.which("luajit")
         self.assertIsNotNone(lua, "install Lua to smoke-test the extracted archive")
+        style_count = len(list((self.root / "love_dicebear/styles").glob("*.lua"))) - 1
         subprocess.run([lua, "-e", """
 package.path = './?.lua;./?/init.lua'
 local dicebear = require('love_dicebear')
 assert(dicebear.version == '1.2.3')
-assert(#dicebear.styles() == 63)
+assert(#dicebear.styles() == EXPECTED_STYLE_COUNT)
 for _, style in ipairs(dicebear.styles()) do
   local svg, state = dicebear.generate(style, {seed = 'release-smoke'})
   assert(svg:find('<svg', 1, true), style)
@@ -63,7 +64,7 @@ for _, style in ipairs(dicebear.styles()) do
 end
 assert(require('love_dicebear.http').url('initials', {seed = 'test'}))
 assert(require('love_dicebear.thorvg'))
-"""], cwd=self.base / "extracted/love-dicebear-1.2.3", check=True)
+""".replace("EXPECTED_STYLE_COUNT", str(style_count))], cwd=self.base / "extracted/love-dicebear-1.2.3", check=True)
 
     def test_rejects_invalid_tags_and_version_mismatch(self):
         for tag in ["1.2.3", "v01.2.3", "v2.0.0", "v1.2.3/../../escape", "v1.2.3-01", "v1.2.3;echo bad"]:

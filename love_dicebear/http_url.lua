@@ -14,7 +14,7 @@ function M.build(style, input, settings)
   assert(type(settings) == 'table', 'HTTP settings must be a table')
   dicebear.resolve(style, input) -- validate without changing caller options
   local schema = dicebear.describe(style).options
-  local base = settings.baseUrl or 'https://api.dicebear.com/10.x'
+  local base = settings.baseUrl or 'https://api.dicebear.com/11.x'
   assert(type(base) == 'string' and base:match('^https?://[^/%s]+')
     and not base:find('[%z\1-\32\127?#]'), 'baseUrl must be an HTTP(S) version root without query or fragment')
   base = base:gsub('/+$', '')
@@ -23,7 +23,9 @@ function M.build(style, input, settings)
   local values = {seed = input.seed or '', size = tostring(size)}
   for key, value in pairs(input) do
     local spec = schema[key]
-    if key == 'fontFamily' or key == 'fontWeight' then
+    if key:match('^animation') or key:find('Animation', 1, true) then
+      error('Animation options require local SVG rendering; HTTP PNG output is static', 2)
+    elseif key == 'fontFamily' or key == 'fontWeight' then
       assert(value == spec.default, key .. ' is not supported by the public HTTP API')
     elseif key == 'title' then
       error('title is not supported by the public HTTP API', 2)

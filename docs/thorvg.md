@@ -42,9 +42,7 @@ directory. Rendering requires LÖVE; the core generator does not.
 ## SVG text and fonts
 
 `initials` and `initial-face` can render locally when you supply a font and use
-an SVG-font-capable love-thorvg build. The published v0.2.0 binary does not
-preload SVG fonts; update both its Lua wrapper and native library.
-The upstream implementation is tracked in [love-thorvg PR #1](https://github.com/Kyonru/love-thorvg/pull/1). The adapter
+love-thorvg **0.3.0** or newer with its matching native library. The adapter
 checks `thorvg.capabilities.svgFonts` and reports missing support explicitly.
 
 ```lua
@@ -75,8 +73,8 @@ npm run dev -- --style initial-face --font examples/fonts/Abel-Regular.ttf
 love . --font-test
 ```
 
-The launcher still pins the published v0.2.0 release, so install the updated
-renderer manually first; an existing installation is preserved. Without a
+The launcher pins v0.3.0. Existing manual installations are preserved; replace
+an older `love_thorvg/` directory with the complete v0.3.0 package to upgrade. Without a
 font, the example offers SVG export or an HTTP preview. The experimental web
 backend does not yet support SVG font preloading.
 
@@ -97,3 +95,45 @@ Run `npm run dev` (or `love .` after setup) for the catalog example: Up/Down cha
 style, Tab selects an avatar setting and Left/Right changes it, and R generates a new
 avatar. Saved files are written to LÖVE's save directory; the full path is
 printed to the console.
+
+## Animation
+
+love-dicebear 2.0.0 plays the catalog's declarative timelines through
+love-thorvg 0.3.0's SVG element API. The bundled engine is ThorVG 1.2.0-dev,
+pinned to `7793957774e5b494c07ac77cf555789ce3ae059c`.
+
+```lua
+local avatar = avatars.new('dogs', {
+  seed = 'Milo', animation = true, animationSpeed = 1.2,
+  wagAnimationSpeed = 0.8,
+}, {width = 256, height = 256})
+
+function love.update(dt) avatar:update(dt) end
+function love.draw() avatar:draw(32, 32) end
+function love.quit() avatar:release() end
+```
+
+Animation is off by default. `animation = true` enables all timelines selected
+by the avatar's artwork. `wagAnimation = false` disables only the named timeline;
+`wagAnimation = true` enables it even when global animation is off. The named
+controls available to a style appear in `dicebear.describe(style).options`.
+Some variants in an animated style may still be static.
+
+The player evaluates translation, rotation, scale, opacity, easing, delay,
+direction, and fill behavior in Lua and edits the loaded SVG scene in place.
+It reuses the native document and the uncached LÖVE texture. Each track loops on
+its own duration, and transforms pivot around the resting SVG fill-box geometry.
+This does not rely on ThorVG interpreting browser CSS animations.
+
+Call `pause()`, `play()`, or `seek(seconds)` to control playback. `seek(0)` restores
+the first animation frame. `setProgress(0..1)` maps to the longest single timeline
+cycle including positive delay; independent cycles need not align at its end.
+`autoplay = false` starts paused, `speed` scales the player's clock, and
+`loop = false` stops at the end of that longest cycle. Native applications must
+implement reduced-motion preferences by passing `animation = false` (and disabling
+any named overrides). `animationRespectReducedMotion` controls exported CSS only.
+
+Animated element edits invalidate the renderer's frame cache, so leave
+`frameCache = 0` for continuous animation. The experimental web backend does not
+expose SVG element editing. An older or unsupported renderer raises a capability
+error before staging the avatar; static SVG generation remains dependency-free.

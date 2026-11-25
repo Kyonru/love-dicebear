@@ -45,6 +45,12 @@ end
 editor.onChange = rebuild
 
 function love.load(args)
+  if args[1] == '--animation-test' then
+    local ok, err = pcall(require('tests.animation_render').run)
+    if not ok then print(err) end
+    love.event.quit(ok and 0 or 1)
+    return
+  end
   if args[1] == '--http-test' then
     smoke = require('tests.http_live').new()
     return
@@ -69,25 +75,31 @@ function love.load(args)
     love.event.quit(ok and 0 or 1)
     return
   end
+  local animate
   for i, arg in ipairs(args) do
     if arg == '--style' then styleName = assert(args[i + 1], '--style requires a name') end
     if arg == '--renderer' then
       renderer = args[i + 1]
       assert(renderer == 'thorvg' or renderer == 'http', '--renderer must be thorvg or http')
     end
+    if arg == '--animate' then animate = true end
     if arg == '--cache' then cacheEnabled = true end
     if arg == '--font' then fontPath = assert(args[i + 1], '--font requires a path inside the game') end
   end
   if args[1] == '--editor-test' then styleName, renderer = 'initials', 'thorvg' end
   selectStyle(styleName)
   love.window.setTitle('love-dicebear / Style catalog')
-  rebuild({seed = 'hello-love', backgroundColor = 'e8edf2', borderRadius = 12})
+  assert(not animate or renderer == 'thorvg', '--animate requires the local ThorVG renderer')
+  rebuild({seed = 'hello-love', backgroundColor = 'e8edf2', borderRadius = 12, animation = animate})
   if args[1] == '--editor-test' then smoke = require('tests.editor_render').new(editor) end
 end
 
 function love.update(dt)
   if smoke then smoke:update(dt); return end
-  if renderer ~= 'http' then return end
+  if renderer ~= 'http' then
+    if document then document:update(dt) end
+    return
+  end
   if pending then
     pending = pending - dt
     if pending <= 0 then

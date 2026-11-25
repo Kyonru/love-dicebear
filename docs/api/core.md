@@ -22,7 +22,7 @@ Functions do not mutate your input tables or change `math.random` state.
 
 ## `version`
 
-The installed library's version string, currently `1.0.0`. Save it alongside
+The installed library's version string, currently `2.0.0`. Save it alongside
 avatars when reproducibility across future upgrades matters.
 
 ```lua
@@ -31,7 +31,7 @@ local saved = {version = dicebear.version, style = 'bottts', settings = settings
 
 ## `styles()`
 
-Returns a fresh array of all 63 supported names. Each call returns an independent
+Returns a fresh array of all supported names. Each call returns an independent
 copy; changing this array does not change the library. Styles load lazily.
 
 ```lua

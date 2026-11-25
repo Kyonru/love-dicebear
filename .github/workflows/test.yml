@@ -3,6 +3,7 @@ on:
   push:
     branches: ["**"]
   pull_request:
+  workflow_dispatch:
   workflow_call:
 jobs:
   lua:
@@ -21,6 +22,7 @@ jobs:
       - run: npm run test:dev
       - run: ${{ matrix.lua }} tests/run.lua
       - run: ${{ matrix.lua }} tests/adapter.lua
+      - run: ${{ matrix.lua }} tests/animation.lua
       - run: ${{ matrix.lua }} tests/save.lua
       - run: ${{ matrix.lua }} tests/editor.lua
       - run: ${{ matrix.lua }} tests/http_url.lua
@@ -40,6 +42,7 @@ jobs:
           python-version: '3.14'
       - run: sudo apt-get update && sudo apt-get install -y lua5.4
       - run: python tests/release.py
+      - run: python tests/catalog_update.py
 
   example-ui:
     runs-on: ubuntu-latest
@@ -50,6 +53,17 @@ jobs:
         env:
           LIBGL_ALWAYS_SOFTWARE: '1'
         run: timeout 60s xvfb-run -a love . --editor-test
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install pinned animation renderer
+        run: npm run setup
+      - name: Verify animated styles and supplied fonts
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: |
+          timeout 120s xvfb-run -a love . --animation-test
+          timeout 60s xvfb-run -a love . --font-test
       - uses: actions/upload-artifact@v4
         if: always()
         with:
