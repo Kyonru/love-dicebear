@@ -46,7 +46,9 @@ try {
   const vectors = cases.slice(0,9).flatMap(({seed}) => ['eyesVariant','baseColor',''].map(key =>
     ({seed, key, hash:Fnv1a.hash(seed), value:new Prng(seed).getValue(key)})));
   writeFileSync(join(directory,'prng.lua'), `return ${lua(vectors)}\n`);
-  const run = spawnSync(process.env.LUA || 'lua', ['tests/parity.lua',directory], {encoding:'utf8'});
+  const command = process.env.LOVE || process.env.LUA || 'lua';
+  const args = process.env.LOVE ? ['.','--parity',directory] : ['tests/parity.lua',directory];
+  const run = spawnSync(command, args, {encoding:'utf8', timeout:60000});
   assert.equal(run.status, 0, run.error?.message || run.stderr || run.stdout);
   for (let i = 0; i < cases.length; i++) {
     assert.equal(readFileSync(join(directory,`${i+1}.svg`),'utf8'), new Avatar(style,cases[i]).toString(),
