@@ -8,6 +8,38 @@ native generator, or JSON parser is needed in your game.
 SVG generation and rendering are separate. Use any SVG renderer, or the optional
 adapter for [love-thorvg](https://github.com/Kyonru/love-thorvg).
 
+## Quick start the example
+
+Install [LÖVE 11.x](https://love2d.org/) and Node.js 22 or newer, then run:
+
+```sh
+npm run dev
+```
+
+This downloads the **love-thorvg v0.2.0** release for your machine, verifies its
+pinned SHA256 checksum, installs the renderer and license notices in the ignored
+`love_thorvg/` directory, and launches the example. Subsequent runs reuse the
+installed renderer and work offline. An existing local renderer is preserved;
+an incomplete installation reports an error instead of being overwritten.
+
+Prebuilt packages cover macOS ARM64/x64, Linux x64, and Windows x64. Extraction
+uses `unzip` on macOS/Linux or PowerShell on Windows. LÖVE itself must be
+installed separately; the launcher checks `PATH`, `/Applications/love.app` on
+macOS, and the standard Program Files location on Windows. Use `LOVE` to select
+another executable. The example uses love-thorvg for all avatar rendering.
+
+```sh
+npm run setup                  # download the renderer without launching
+npm run dev -- --render-test    # run native rendering checks
+LOVE=/path/to/love npm run dev  # select a LÖVE executable (macOS/Linux)
+```
+
+No `npm install` is needed to launch: the dev script uses Node's built-in APIs.
+Run `npm ci --ignore-scripts` when you want the JavaScript reference used by
+`npm test`. For a previously downloaded release ZIP, set `LOVE_THORVG_ARCHIVE`
+to its path; the same pinned checksum is checked. The launcher does not watch
+files or hot-reload; restart it after editing Lua.
+
 ## Install
 
 Copy `love_dicebear.lua` and `love_dicebear/` into your game's root. Keep `THIRD_PARTY.md`,
@@ -145,6 +177,7 @@ lua tests/adapter.lua
 lua tests/save.lua
 npm ci --ignore-scripts
 npm test
+npm run test:dev
 love . --test
 love . --render-test  # requires love_thorvg/
 ```
