@@ -8,6 +8,7 @@ docs_dir = "docs"
 site_dir = "site"
 not_in_nav = "styles/*.md"
 extra_css = ["assets/stylesheets/docs.css"]
+extra_javascript = ["assets/javascripts/sidebar.js"]
 nav = [
   { "Overview" = "index.md" },
   { "Guides" = [

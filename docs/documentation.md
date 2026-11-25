@@ -60,7 +60,8 @@ for the underlying GitHub Pages integration.
 The theme uses `navigation.instant` to fetch internal pages without reloading
 the browser document. Keep `site_url` set to the GitHub Pages project URL.
 Each source page has a Lucide `icon` in its front matter; the preparation script
-adds icons to generated pages. No custom client-side router is needed.
+adds icons to generated pages. A small `sidebar.js` hook preserves desktop menu
+scroll position after the theme mounts each page; Zensical still owns routing.
 
 The preparation script also generates `docs/styles/` from the 63 pinned style
 JSON definitions. Edit the canonical definitions through the normal import
