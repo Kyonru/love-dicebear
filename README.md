@@ -1,8 +1,10 @@
 # love-dicebear
 
 Generate customizable [DiceBear](https://www.dicebear.com/) avatars locally in
-Lua and LÖVE. The first release includes **Bottts**, with all 53 variants across
-eyes, heads, mouths, sides, textures, and tops. No HTTP requests, Node runtime,
+Lua and LÖVE. Includes **all 63 styles** from the pinned DiceBear catalog,
+including Adventurer, Avataaars, Bottts, Lorelei, Micah, Notionists, Open Peeps,
+Pixel Art, and Initials. See [STYLES.md](STYLES.md) for the full list and licenses.
+No HTTP requests, Node runtime,
 native generator, or JSON parser is needed in your game.
 
 SVG generation and rendering are separate. Use any SVG renderer, or the optional
@@ -31,6 +33,7 @@ another executable. The example uses love-thorvg for all avatar rendering.
 ```sh
 npm run setup                  # download the renderer without launching
 npm run dev -- --render-test    # run native rendering checks
+npm run dev -- --style lorelei  # start with a specific style
 LOVE=/path/to/love npm run dev  # select a LÖVE executable (macOS/Linux)
 ```
 
@@ -43,7 +46,8 @@ files or hot-reload; restart it after editing Lua.
 ## Install
 
 Copy `love_dicebear.lua` and `love_dicebear/` into your game's root. Keep `THIRD_PARTY.md`,
-`vendor/DICEBEAR-LICENSE`, and `LICENSE` with distributed copies. The raw JSON,
+`STYLES.md`, `vendor/DICEBEAR-LICENSE`, `vendor/UNICODE-LICENSE`, and `LICENSE`
+with distributed copies. The raw JSON,
 scripts, tests, and Node development dependencies are not needed at runtime.
 
 ```lua
@@ -65,6 +69,10 @@ love.filesystem.write('avatar.svg', svg)
 The same style, seed, and options produce the same SVG. The module supports Lua
 5.1 syntax and runs in LÖVE 11.x / LuaJIT and standalone Lua. Tests have been run
 with Lua 5.4 and LÖVE 11.5 on macOS ARM64. It does not change `math.random` state.
+
+Use `dicebear.styles()` to list the available names. Each module loads lazily:
+generating one style does not load the other artwork. Changing styles is simply
+`dicebear.generate('lorelei', {seed = 'player-42'})`.
 
 ## Build an editor
 
@@ -96,6 +104,13 @@ transparent colors use empty arrays. Resolved settings pin every choice:
 changing their seed alone does **not** randomize them. To create a new avatar,
 start with `{seed = newSeed}` and whichever restrictions you want to keep.
 
+Some styles repeat a component through aliases. A source component's options
+constrain its aliases, but each alias makes an independent seeded choice.
+`describe` marks aliases with `extends`; this Lua API also accepts explicit
+alias choices so editors can change an individual repeated shape. Resolved
+settings include these choices and visibility values for reliable round trips.
+Per-component transforms from the definition remain deterministic from the seed.
+
 ## Supported options
 
 | Option | Accepted values |
@@ -103,9 +118,10 @@ start with `{seed = newSeed}` and whichever restrictions you want to keep.
 | `seed` | UTF-8 string; default `''` |
 | `title` | Optional accessible SVG title |
 | `size` | Output width/height, 1–8192; omitted by default |
-| `eyesVariant`, `headVariant`, `mouthVariant`, `sidesVariant`, `textureVariant`, `topVariant` | One variant name, an array of allowed names, or a `{name = weight}` map |
-| Corresponding `*Probability` | 0–100; default 100 except texture, which defaults to 50 |
-| `baseColor`, `backgroundColor` | Hex string or palette array; optional `#`; RGB, RGBA, RRGGBB, or RRGGBBAA |
+| `<component>Variant` | One variant name, an array of allowed names, or a `{name = weight}` map; component names come from `describe(style)` |
+| Corresponding `*Probability` | 0–100; defaults come from the style |
+| `<group>Color`, `backgroundColor` | Hex string or palette array; optional `#`; RGB, RGBA, RRGGBB, or RRGGBBAA; groups come from `describe(style)` |
+| `fontFamily`, `fontWeight` | SVG text font family string (default `system-ui`) and weight 1–1000 (default 400) |
 | `flip` | `none`, `horizontal`, `vertical`, `both` |
 | `rotate` | −360–360 degrees |
 | `scale` | 0–10; `1` is original size |
@@ -116,18 +132,23 @@ Rotate, scale, translations, and border radius also accept `{min, max}` arrays
 (or a one-value array). Empty ranges use the default. Variant weights must be
 finite numbers between 0 and 1,000,000; all-zero weights select uniformly.
 Empty variant arrays hide the component. Color arrays select a seeded solid
-color; an empty background palette is transparent. The default base palette is
-bundled in the style. Inputs and returned descriptors are never mutated.
+color; an empty background palette is transparent. Palettes, contrast rules,
+and color exclusions are bundled in each style. Inputs and returned descriptors
+are never mutated.
 
-This release supports **Bottts and solid colors**, not the whole DiceBear core.
-Other styles, user-supplied definitions, gradients, tag filtering, font options,
-and ID randomization are not implemented. Unsupported or misspelled options
+This release generates **static SVGs for all bundled styles**. Animation
+annotations are preserved in the source but are not played or emitted. Built-in
+artwork gradients and filters are retained; configurable color gradients,
+user-supplied definitions, tag filtering, and ID randomization are not
+implemented. Unsupported or misspelled options
 raise an error. Tags are exposed as editor metadata only. Multiple generated
 SVGs should be loaded as separate documents; inlining them into one DOM can
 collide on artwork IDs.
 
 The supported output is tested byte-for-byte against **DiceBear Core 10.7.0**
-with the pinned style definition in `vendor/bottts.json`. DiceBear version 9
+with the pinned style definitions in `vendor/`. For schema 2 definitions with
+animation annotations, the reference test uses their static projection because
+Core 10.7.0's validator predates those annotations. DiceBear version 9
 seeds and option names are not interchangeable with this API. Store the library
 version with saved avatars when you need stability across future upgrades.
 
@@ -161,12 +182,21 @@ love-thorvg currently takes a path, loads it synchronously, then removes the
 temporary file even if loading fails. It therefore needs a writable save
 directory. Rendering requires LÖVE; the core generator does not.
 
+**SVG text is a known limitation of the tested love-thorvg v0.2.0 build.**
+`initials` and `initial-face` generate correct SVGs but cannot be fully previewed
+with that backend. The adapter rejects SVG text instead of returning a blank or
+incomplete avatar. The example displays a notice for those two styles and still
+lets you save their SVGs for another renderer. Embedding a font did not resolve
+the limitation in the tested build. Other renderer differences in filters,
+blending, or masking are not covered by byte-level generator parity.
+
 Keep the returned document between frames. When an editor changes settings,
 create the replacement document, then release the old one. Do not generate or
 rasterize the avatar every `love.draw` call.
 
-Run `love .` from this repository for a small example: Left/Right changes eyes
-without changing other features, R generates a new avatar, and S saves
+Run `npm run dev` (or `love .` after setup) for the catalog example: Up/Down changes
+style, Left/Right changes eyes or the first component, R generates a new avatar,
+and S saves
 `avatar.svg` in LÖVE's save directory (the full path is printed to the console).
 
 ## Development
@@ -180,16 +210,20 @@ npm test
 npm run test:dev
 love . --test
 love . --render-test  # requires love_thorvg/
+love . --catalog-render-test  # 61 native previews + 2 documented text limitations
 ```
 
 Node is used only for comparison against the pinned JavaScript reference.
 Set `LUA=luajit` to run the parity suite with another Lua executable, or
 `LOVE=/path/to/love npm test` to compare SVGs generated inside LÖVE.
 
-The parity suite covers every variant, Unicode seeds, weights, visibility,
+The parity suite covers all 63 styles and 2,985 variant selections, Unicode seeds, weights, visibility,
 palette filtering, XML escaping, and transforms. The native smoke suite checks
-all 53 variants produce nonblank images, then resizes and releases each
-document. It is not a pixel-by-pixel comparison with another SVG renderer.
+all 53 Bottts variants; the catalog smoke suite checks 61 styles without
+backgrounds, then resizes and releases each document. It also generates a
+`catalog-smoke.png` contact sheet in the LÖVE save directory. These are not
+pixel-by-pixel comparisons with another SVG renderer. All 7,096 parity cases
+have also passed inside LÖVE/LuaJIT. To test one style, run `npm test -- lorelei`.
 Native checks passed against love-thorvg commit
 `02bc96e9c63f50a99beba371534fd06a14aae407` on macOS ARM64.
 
@@ -197,5 +231,6 @@ Run `python3 scripts/import_style.py` to regenerate the Lua artwork from the
 vendored JSON. Do not edit the generated style directly. Review licensing and
 parity before changing the upstream pin.
 
-Code is MIT licensed. Bottts artwork is by **Pablo Stanley** and has its own
-terms; see [THIRD_PARTY.md](THIRD_PARTY.md). This is an independent Lua port.
+Code is MIT licensed. Artwork licenses vary by style; see
+[STYLES.md](STYLES.md) and [THIRD_PARTY.md](THIRD_PARTY.md).
+This is an independent Lua port.

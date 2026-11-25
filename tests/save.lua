@@ -24,6 +24,21 @@ local ok, message = pcall(function()
   love.keypressed('right')
   love.keypressed('s')
   assert(saved == dicebear.generate('bottts', settings), 'saved SVG differs from current avatar')
+  love.load({'--style', 'lorelei'})
+  love.keypressed('right')
+  love.keypressed('s')
+  assert(saved == dicebear.generate('lorelei', settings), 'selected style was not saved')
+  love.load({'--style', 'initials'})
+  love.keypressed('s')
+  assert(saved == dicebear.generate('initials', {
+    seed = 'hello-love', backgroundColor = 'e8edf2', borderRadius = 12,
+  }), 'text-only style cannot be exported without a preview')
+  love.keypressed('down')
+  love.keypressed('s')
+  local names = dicebear.styles()
+  local nextStyle
+  for i, name in ipairs(names) do if name == 'initials' then nextStyle = names[i % #names + 1] end end
+  assert(saved == dicebear.generate(nextStyle, settings), 'style navigation retained stale settings')
 end)
 love, package.loaded['love_dicebear.thorvg'] = oldLove, oldAdapter
 assert(ok, message)

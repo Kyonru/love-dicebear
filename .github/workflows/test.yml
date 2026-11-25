@@ -21,4 +21,4 @@ jobs:
       - run: npm test
         env:
           LUA: ${{ matrix.lua }}
-      - run: python3 scripts/import_style.py && git diff --exit-code -- love_dicebear/styles/bottts.lua
+      - run: python3 scripts/import_style.py && git diff --exit-code -- love_dicebear/styles STYLES.md
