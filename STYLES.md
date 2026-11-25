@@ -53,3 +53,4 @@ Generated from the pinned upstream definitions. Artwork licenses are independent
 | `planets` | DiceBear | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/planets.json) |
 | `rings` | DiceBear | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/rings.json) |
 | `shadows` | DiceBear | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/shadows.json) |
+| `shape-grid` | DiceBear | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/shape-grid.json) |
