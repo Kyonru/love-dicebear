@@ -22,7 +22,7 @@ Functions do not mutate your input tables or change `math.random` state.
 
 ## `version`
 
-The installed library's version string, currently `1.0.0`. Save it alongside
+The installed library's version string, currently `2.0.0`. Save it alongside
 avatars when reproducibility across future upgrades matters.
 
 ```lua

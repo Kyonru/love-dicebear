@@ -22,13 +22,13 @@ local ok, message = pcall(function()
     files[directory .. '/response.png'] = 'PNG fixture'; return 0
   end
   local run = assert(loadfile('love_dicebear/http_worker.lua'))
-  run('https://api.dicebear.com/10.x/initials/png?seed=%22%26%24', directory, 4, false, replies, cancel)
+  run('https://api.dicebear.com/11.x/initials/png?seed=%22%26%24', directory, 4, false, replies, cancel)
   assert(result.bytes == 'PNG fixture' and next(files) == nil)
   failing = true
-  run('https://api.dicebear.com/10.x/initials/png', directory, 4, false, replies, cancel)
+  run('https://api.dicebear.com/11.x/initials/png', directory, 4, false, replies, cancel)
   assert(result.error:find('HTTP 429', 1, true) and next(files) == nil)
   cancelled, result, command = true, nil, nil
-  run('https://api.dicebear.com/10.x/initials/png', directory, 4, false, replies, cancel)
+  run('https://api.dicebear.com/11.x/initials/png', directory, 4, false, replies, cancel)
   assert(result == nil and command == nil and next(files) == nil)
 end)
 love, os.execute = oldLove, oldExecute

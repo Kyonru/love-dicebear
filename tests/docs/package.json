@@ -2,6 +2,6 @@
   "name": "love-dicebear-docs-tests",
   "private": true,
   "type": "module",
-  "scripts": {"test": "node navigation.mjs"},
+  "scripts": {"test": "node navigation.mjs && node animation.mjs"},
   "devDependencies": {"playwright": "1.65.1"}
 }

@@ -26,13 +26,13 @@ it is not needed by either runtime renderer.
 Set `LUA=luajit` to run the parity suite with another Lua executable, or
 `LOVE=/path/to/love npm test` to compare SVGs generated inside LÖVE.
 
-The parity suite covers all 63 styles and 2,985 variant selections, Unicode seeds, weights, visibility,
+The parity suite covers all bundled styles and their variant selections, Unicode seeds, weights, visibility,
 palette filtering, XML escaping, and transforms. The native smoke suite checks
 all 53 Bottts variants; the catalog smoke suite checks all 63 styles with an
 SVG-font-capable renderer (61 otherwise), then resizes and releases each document. It also generates a
 `catalog-smoke.png` contact sheet in the LÖVE save directory. These are not
-pixel-by-pixel comparisons with another SVG renderer. All 7,096 parity cases
-have also passed inside LÖVE/LuaJIT. To test one style, run `npm test -- lorelei`.
+pixel-by-pixel comparisons with another SVG renderer. The 1.x baseline of 7,096 parity cases
+also passed inside LÖVE/LuaJIT; `npm test` reports the current catalog total. To test one style, run `npm test -- lorelei`.
 Native checks passed against love-thorvg commit
 `02bc96e9c63f50a99beba371534fd06a14aae407` on macOS ARM64.
 

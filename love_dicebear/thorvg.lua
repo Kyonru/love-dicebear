@@ -7,13 +7,19 @@ local counter = 0
 
 function M.new(style, options, renderOptions)
   assert(love and love.filesystem, 'love_dicebear.thorvg requires LÖVE')
-  local svg, resolved = dicebear.generate(style, options)
+  local resolved = dicebear.resolve(style, options)
+  local definition = require('love_dicebear.styles.' .. style)
+  local svg, tracks = require('love_dicebear.renderer').render(definition, resolved, true)
   local settings = util.copy(renderOptions or {})
   if svg:find('<text[%s>]') then
     assert(type(settings.fonts) == 'table' and settings.fonts[resolved.fontFamily],
       'SVG text requires a font mapping for ' .. resolved.fontFamily .. ' in renderOptions.fonts')
   end
   local thorvg = require('love_thorvg')
+  if #tracks > 0 then
+    assert(thorvg.capabilities and thorvg.capabilities.svgElements,
+      'Avatar animation requires love-thorvg 0.3.0 with SVG element editing')
+  end
   if svg:find('<text[%s>]') then
     assert(thorvg.capabilities and thorvg.capabilities.svgFonts,
       'SVG text requires a love-thorvg build with SVG font preloading; update its Lua wrapper and native library')
@@ -37,6 +43,8 @@ function M.new(style, options, renderOptions)
     document:release()
     error('could not remove temporary SVG: ' .. path, 2)
   end
+  local attached, result = pcall(require('love_dicebear.animation_player').attach, document, tracks, renderOptions or {})
+  if not attached then document:release(); error(result, 2) end
   return document, resolved
 end
 

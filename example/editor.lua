@@ -47,6 +47,7 @@ function Editor:isEnabled(row)
   local name = row.name
   local component = name:match('^(.*)Probability$')
   local alias = row.spec.extends or (component and self.description.options[component .. 'Variant'].extends)
+  if name:find('Animation', 1, true) or name:match('^animation') then return false end
   return not alias and name ~= 'fontFamily' and name ~= 'fontWeight' and name ~= 'title'
 end
 
@@ -98,7 +99,9 @@ function Editor:adjust(direction)
   local row = self.rows[self.selected]
   if not self:isEnabled(row) then self.message = 'This setting is local-only.'; return end
   local spec, value = row.spec, self.resolved[row.name]
-  if spec.type == 'variant' or spec.type == 'enum' or spec.type == 'color' then
+  if spec.type == 'boolean' then
+    self:apply(not value)
+  elseif spec.type == 'variant' or spec.type == 'enum' or spec.type == 'color' then
     local choices = copy(spec.values or (#spec.palette > 0 and spec.palette or fallbackColors))
     if spec.type == 'variant' then
       choices[#choices + 1] = none
@@ -114,7 +117,7 @@ function Editor:adjust(direction)
     self:apply(chosen == 'transparent' and {} or chosen)
   elseif spec.type == 'number' or spec.type == 'range' then
     local maximum = self.renderer == 'http' and row.name == 'size' and 256 or spec.max
-    local step = steps[row.name] or 10
+    local step = steps[row.name] or (row.name:match('[Ss]peed$') and .1) or (row.name:match('[Dd]elay$') and .1) or 10
     local number = math.max(spec.min, math.min(maximum, (value or spec.default or 256) + step * direction))
     self:apply(math.floor(number * 10000 + 0.5) / 10000)
   else self:beginInput() end
@@ -131,6 +134,9 @@ function Editor:keypressed(key)
       if row.spec.type == 'number' or row.spec.type == 'range' then
         value = tonumber(value)
         if not value then self.message = 'Enter a number.'; return true end
+      elseif row.spec.type == 'boolean' then
+        if value ~= 'true' and value ~= 'false' then self.message = 'Enter true or false.'; return true end
+        value = value == 'true'
       elseif row.spec.type == 'variant' and value == 'None' then value = none
       elseif row.spec.type == 'color' and value:lower() == 'transparent' then value = {} end
       if self:apply(value) then self.input = nil end

@@ -40,7 +40,7 @@ local request = http.new('initials', {seed = 'Ada', size = 128}, {
 
 | Setting | Type and default | Behavior |
 | --- | --- | --- |
-| `baseUrl` | string; `https://api.dicebear.com/10.x` | HTTP(S) version root; no query, fragment, whitespace, or control characters |
+| `baseUrl` | string; `https://api.dicebear.com/11.x` | HTTP(S) version root; no query, fragment, whitespace, or control characters |
 | `timeout` | number; `20` | Total request timeout in seconds, inclusive range 1–60 |
 | `cache` | `false` / omitted | Disable disk-cache reads and writes |
 | `cache = true` | boolean | Cache for 86,400 seconds (24 hours) |

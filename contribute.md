@@ -23,7 +23,7 @@ Install [LÖVE 11.x](https://love2d.org/) and Node.js 22 or newer, then run:
 npm run dev
 ```
 
-This downloads the **love-thorvg v0.2.0** release for your machine, verifies its
+This downloads the **love-thorvg v0.3.0** release for your machine, verifies its
 pinned SHA256 checksum, installs the renderer and license notices in the ignored
 `love_thorvg/` directory, and launches the example. Subsequent runs reuse the
 installed renderer and work offline. An existing local renderer is preserved;
@@ -71,6 +71,7 @@ files or hot-reload; restart it after editing Lua.
 ```sh
 lua tests/run.lua
 lua tests/adapter.lua
+lua tests/animation.lua
 lua tests/save.lua
 lua tests/editor.lua
 lua tests/http_url.lua
@@ -83,6 +84,7 @@ love . --test
 love . --editor-test  # editor UI/input/save smoke test; no renderer needed
 love . --render-test  # requires love_thorvg/
 love . --catalog-render-test  # all 63 with SVG font support; otherwise 61
+love . --animation-test  # all 21 animated styles through love-thorvg 0.3.0
 love . --font-test  # text pixels, shared ownership, and missing-font errors
 love . --http-test  # opt-in live API download, draw, save, and disk-cache test
 ```
@@ -92,13 +94,13 @@ it is not needed by either runtime renderer.
 Set `LUA=luajit` to run the parity suite with another Lua executable, or
 `LOVE=/path/to/love npm test` to compare SVGs generated inside LÖVE.
 
-The parity suite covers all 63 styles and 2,985 variant selections, Unicode seeds, weights, visibility,
+The parity suite covers all bundled styles and their variant selections, Unicode seeds, weights, visibility,
 palette filtering, XML escaping, and transforms. The native smoke suite checks
 all 53 Bottts variants; the catalog smoke suite checks all 63 styles with an
 SVG-font-capable renderer (61 otherwise), then resizes and releases each document. It also generates a
 `catalog-smoke.png` contact sheet in the LÖVE save directory. These are not
-pixel-by-pixel comparisons with another SVG renderer. All 7,096 parity cases
-have also passed inside LÖVE/LuaJIT. To test one style, run `npm test -- lorelei`.
+pixel-by-pixel comparisons with another SVG renderer. The 1.x baseline of 7,096 parity cases
+also passed inside LÖVE/LuaJIT; `npm test` reports the current catalog total. To test one style, run `npm test -- lorelei`.
 Native checks passed against love-thorvg commit
 `02bc96e9c63f50a99beba371534fd06a14aae407` on macOS ARM64.
 
@@ -143,19 +145,19 @@ portable archive, because the Lua library does not bundle native dependencies.
 
 1. Set `version` in `love_dicebear/init.lua` to the intended release version.
 2. Update the guides for any API changes and run the relevant tests above.
-3. Validate and inspect a local package (replace `v1.0.0` with your version):
+3. Validate and inspect a local package (replace `v2.0.0` with your version):
 
    ```sh
    python3 tests/release.py
-   python3 scripts/package_release.py --version v1.0.0
+   python3 scripts/package_release.py --version v2.0.0
    ```
 
 4. Commit the changes, then push the release commit and matching tag:
 
    ```sh
    git push origin main
-   git -c tag.gpgSign=false tag -a v1.0.0 -m "love-dicebear v1.0.0"
-   git push origin v1.0.0
+   git -c tag.gpgSign=false tag -a v2.0.0 -m "love-dicebear v2.0.0"
+   git push origin v2.0.0
    ```
 
 The tag must match the Lua version exactly (with a leading `v`). Prerelease tags

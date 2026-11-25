@@ -40,6 +40,22 @@ This archive includes adapter code, but does not bundle their dependencies:
 No renderer is downloaded or enabled automatically by the library.
 Development scripts and the interactive example are available in the source repository.
 
+## Animation
+
+Use love-thorvg **0.3.0** or newer for local playback:
+
+```lua
+local avatar = require('love_dicebear.thorvg').new('cats', {seed = 'Milo', animation = true})
+function love.update(dt) avatar:update(dt) end
+function love.draw() avatar:draw(32, 32) end
+function love.quit() avatar:release() end
+```
+
+`dicebear.generate('cats', {animation = true})` exports SVG with CSS keyframes
+for browser playback. Animation stays off by default. Native applications
+control reduced motion themselves; exported SVG respects the browser's preference.
+HTTP PNG output is static. See the [animation guide](https://kyonru.github.io/love-dicebear/thorvg/#animation).
+
 ## License
 
 Library code is MIT licensed. Artwork licenses vary; see `STYLES.md` and

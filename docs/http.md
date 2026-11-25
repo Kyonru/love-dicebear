@@ -81,8 +81,8 @@ games can manage that policy or leave caching disabled and own their cache.
 
 ## API options and hosting
 
-The default endpoint is `https://api.dicebear.com/10.x`. To use a self-hosted
-instance, pass `{baseUrl = 'https://avatars.example.com/10.x'}` as the third
+The default endpoint is `https://api.dicebear.com/11.x`. To use a self-hosted
+instance, pass `{baseUrl = 'https://avatars.example.com/11.x'}` as the third
 argument. `http.url(style, options, settings)` returns the encoded PNG URL
 without starting a request and can be used with your own downloader/cache.
 

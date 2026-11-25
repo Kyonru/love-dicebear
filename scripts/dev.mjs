@@ -5,12 +5,12 @@ import { dirname, delimiter, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
-const version = 'v0.2.0';
+const version = 'v0.3.0';
 const targets = {
-  'darwin-arm64': ['macos-arm64', 'liblove_thorvg.dylib', '7c489673a3433053a6af2037019a6b33689339fd804c91095302669058382623'],
-  'darwin-x64': ['macos-x64', 'liblove_thorvg.dylib', 'd13337a6cd783cd29dd7455f733a085821f4624fdbf4b51a79f9438de06d48e4'],
-  'linux-x64': ['linux-x64', 'liblove_thorvg.so', 'cb960e168921f8024b666279a768034638cdd474ade1170dcdcef9245bd9d77c'],
-  'win32-x64': ['windows-x64', 'love_thorvg.dll', '3e2588e014ed7f8f59d6b2e28ea30e45939fa2ff96d0eaa84c8cf6879ca8b3a6'],
+  'darwin-arm64': ['macos-arm64', 'liblove_thorvg.dylib', 'd13ef90f92da65bd648a42a305b82d2d0dba432699639742e9b7bb43218d49a7'],
+  'darwin-x64': ['macos-x64', 'liblove_thorvg.dylib', '9815d87f0963facc6a98bb1e66178a2ec44273bd2a8f7cadb0bfab45a8beff87'],
+  'linux-x64': ['linux-x64', 'liblove_thorvg.so', '20fe2fc58f1322d01402764baf5a009ddf694d2f6b8f214c9bfc95a4bc7e4d6a'],
+  'win32-x64': ['windows-x64', 'love_thorvg.dll', '022ee20bd87e6124bdaff128e274f25f625239ea9d2dcb89be031d8d5dea70db'],
 };
 
 export function targetFor(platform = process.platform, arch = process.arch) {

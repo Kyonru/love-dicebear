@@ -14,6 +14,10 @@ adapter for [love-thorvg](https://github.com/Kyonru/love-thorvg). An optional
 HTTP backend downloads PNGs from DiceBear and displays ordinary LÖVE Images.
 
 
+Version **2.0.0** adds [animated avatars](thorvg.md#animation): browser SVG
+keyframes and local playback through love-thorvg **0.3.0**. Animation stays off
+until enabled.
+
 ## Start here
 
 - [Run the example or install the library](getting-started.md).

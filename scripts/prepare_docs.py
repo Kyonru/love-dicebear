@@ -47,6 +47,23 @@ for source in sorted((root / "vendor").glob("*.json")):
         palette = colors.get(group, {}).get("values", [])
         lines += ["### " + group + "Color", "",
                   ", ".join(code(value) for value in palette) if palette else "No bundled palette; omitted values resolve to transparency.", ""]
+    animation_names = set()
+    def collect_animations(value):
+        if isinstance(value, dict):
+            animation_names.update(block["name"] for block in value.get("animations", []))
+            for child in value.values():
+                collect_animations(child)
+        elif isinstance(value, list):
+            for child in value:
+                collect_animations(child)
+    collect_animations(definition)
+    if animation_names:
+        lines += ["## Animation", "", "Enable all selected artwork timelines with `animation = true`, or control a named timeline:", "",
+                  "| Timeline | Switch | Speed | Delay |", "| --- | --- | --- | --- |"]
+        for animation_name in sorted(animation_names):
+            lines += ["| " + code(animation_name) + " | " + code(animation_name + "Animation") + " | "
+                      + code(animation_name + "AnimationSpeed") + " | " + code(animation_name + "AnimationDelay") + " |"]
+        lines += ["", "Some artwork variants may be static. See [animation options](../options.md#animation-options) and [native playback](../thorvg.md#animation).", ""]
     (styles / (name + ".md")).write_text("\n".join(lines), encoding="utf-8")
     catalog = catalog.replace("| `" + name + "` |", "| [`" + name + "`](styles/" + name + ".md) |")
 (docs / "styles.md").write_text("---\nicon: lucide/layout-grid\n---\n" + catalog, encoding="utf-8")

@@ -34,14 +34,14 @@ The table is copied and forwarded to love-thorvg, with these adapter rules:
 | Setting | Adapter behavior |
 | --- | --- |
 | `width`, `height` | Requested raster dimensions; absent values use love-thorvg's intrinsic dimensions |
-| `autoplay` | Always forced to `false` for static avatars |
+| `autoplay` | Static avatars stay paused; animated avatars play unless set to `false` |
 | `assetRoot` | Defaults to `''` so supplied font paths resolve from the game root; explicit values are preserved |
 | `fonts` | Family → font path map; SVG text needs an entry matching the resolved `fontFamily` |
 | Other settings | Forwarded unchanged to the installed love-thorvg version |
 
 Text also requires `love_thorvg.capabilities.svgFonts`. Missing mappings or an
-unsupported build raise before a temporary file is written. The published
-v0.2.0 native binary does not support font preloading. See [SVG fonts](../thorvg.md#svg-text-and-fonts).
+unsupported build raise before a temporary file is written. The pinned
+v0.3.0 native binary includes font preloading and SVG element editing. See [SVG fonts](../thorvg.md#svg-text-and-fonts).
 
 Additional settings supported by the tested desktop wrapper are `filter`
 (default `linear`), `frameCache` (default `0`), `threads` (default `0`),
@@ -54,7 +54,8 @@ for dependency-specific behavior.
 
 ## Returned Document
 
-This is the original love-thorvg object, not a DiceBear-specific wrapper.
+This is the love-thorvg object. For animated avatars, the adapter installs
+DiceBear timeline implementations of `update`, `seek`, and `setProgress`.
 Keep it between frames and release it when replaced or no longer needed.
 
 | Method | Behavior / return value |
@@ -74,8 +75,8 @@ Keep it between frames and release it when replaced or no longer needed.
 | `update(dt)` | Advance playback when active; returns whether playback advanced |
 | `play()` / `pause()` | Change playback state; return the Document |
 
-The playback methods belong to love-thorvg; DiceBear output is static, and the
-adapter disables autoplay. Images and pixel buffers are owned by the Document:
+For animated avatars, the adapter drives these methods with DiceBear timelines.
+Static avatars keep autoplay disabled. Images and pixel buffers are owned by the Document:
 do not free them separately or use them after release/resize. Methods and
 settings outside this table depend on your installed love-thorvg version.
 

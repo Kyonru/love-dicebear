@@ -1,6 +1,7 @@
 local util = require('love_dicebear.util')
 local prng = require('love_dicebear.prng')
 local colors = require('love_dicebear.colors')
+local animation = require('love_dicebear.animation')
 local M = {}
 
 local core = {
@@ -32,6 +33,15 @@ function M.describe(style)
   for name in pairs(groups) do
     result[name .. 'Color'] = {type = 'color', palette = util.copy(
       (style.colors or {})[name] and style.colors[name].values or {})}
+  end
+  result.animation = {type = 'boolean'}
+  result.animationSpeed = {type = 'range', min = 0.01, max = 100, default = 1}
+  result.animationDelay = {type = 'range', min = -10000, max = 10000, default = 0}
+  result.animationRespectReducedMotion = {type = 'boolean'}
+  for _, name in ipairs(animation.names(style)) do
+    result[name .. 'Animation'] = {type = 'boolean'}
+    result[name .. 'AnimationSpeed'] = util.copy(result.animationSpeed)
+    result[name .. 'AnimationDelay'] = util.copy(result.animationDelay)
   end
   return result
 end
@@ -119,6 +129,25 @@ function M.resolve(style, input)
         number(key, lo, spec); number(key, hi, spec)
         lo, hi = math.min(lo, hi), math.max(lo, hi)
         value = util.round((lo + prng.value(seed, key) * (hi - lo)) * 10000) / 10000
+      end
+      result[key] = value
+    end
+  end
+  for key, spec in pairs(schema) do
+    if not core[key] and (spec.type == 'boolean' or spec.type == 'range') and input[key] ~= nil then
+      local value = input[key]
+      if spec.type == 'boolean' then
+        if type(value) ~= 'boolean' then fail(key, 'expected a boolean') end
+      else
+        local lo, hi
+        if type(value) == 'table' then
+          list(key, value)
+          if #value > 2 then fail(key, 'expected at most two bounds') end
+          lo = value[1] or spec.default; hi = value[2] or lo
+        else lo, hi = value, value end
+        number(key, lo, spec); number(key, hi, spec)
+        lo, hi = math.min(lo, hi), math.max(lo, hi)
+        value = util.round((lo + prng.value(seed, key) * (hi-lo)) * 10000) / 10000
       end
       result[key] = value
     end

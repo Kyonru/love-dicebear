@@ -32,6 +32,9 @@ local ok, message = pcall(function()
   local withFont = {width = 128, fonts = {['system-ui'] = 'fonts/Abel.ttf'}}
   supported, textError = pcall(adapter.new, 'initials', {seed = 'Ada'}, withFont)
   assert(not supported and tostring(textError):find('SVG font preloading', 1, true))
+  local animated, animationError = pcall(adapter.new, 'cats', {animation = true}, settings)
+  assert(not animated and tostring(animationError):find('0.3.0', 1, true))
+  assert(next(files) == nil, 'unsupported animation leaked a temporary SVG')
   package.loaded.love_thorvg.capabilities = {svgFonts = true}
   local text = adapter.new('initials', {seed = 'Ada'}, withFont)
   assert(lastSettings.fonts['system-ui'] == 'fonts/Abel.ttf' and lastSettings.assetRoot == '')
