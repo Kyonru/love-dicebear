@@ -57,6 +57,11 @@ for the underlying GitHub Pages integration.
 
 ## Navigation and reference checks
 
+The header's sun/moon toggle switches between light and dark mode. On the first
+visit, the site follows the system color preference; a manual selection is saved
+for subsequent visits. Both palettes are configured in `zensical.toml` using
+Zensical's built-in theme colors.
+
 The theme uses `navigation.instant` to fetch internal pages without reloading
 the browser document. Keep `site_url` set to the GitHub Pages project URL.
 Each source page has a Lucide `icon` in its front matter; the preparation script
@@ -70,7 +75,8 @@ these pages enumerate the style-specific choices.
 
 The docs workflow runs browser checks before deploying: navigation icons,
 instant page changes, retained sidebar scrolling, history, style links, and
-mobile layout. Screenshots are attached as `documentation-previews` artifacts.
+mobile layout, system color preferences, and theme selection persistence.
+Screenshots are attached as `documentation-previews` artifacts.
 To run those checks locally after building:
 
 ```sh

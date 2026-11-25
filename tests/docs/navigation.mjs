@@ -11,7 +11,7 @@ await mkdir(output, {recursive: true});
 const browser = await chromium.launch({headless: true});
 let lastPage;
 try {
-  const context = await browser.newContext({viewport: {width: 1440, height: 900}});
+  const context = await browser.newContext({viewport: {width: 1440, height: 900}, colorScheme: 'light'});
   const errors = [], missing = [];
   // Exercise the exact Pages base path without publishing a test build or using a server.
   await context.route(origin + '**', async route => {
@@ -27,6 +27,16 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(origin);
   await page.waitForFunction(() => typeof document$ !== 'undefined');
+  const expectScheme = async (target, scheme) => {
+    await target.waitForFunction(value => document.body.dataset.mdColorScheme === value, scheme);
+  };
+  await expectScheme(page, 'default');
+  await page.screenshot({path: path.join(output, 'overview-desktop.png'), fullPage: true});
+  await page.getByTitle('Switch to dark mode', {exact: true}).click();
+  await expectScheme(page, 'slate');
+  await page.reload();
+  await expectScheme(page, 'slate');
+  await page.screenshot({path: path.join(output, 'overview-dark-desktop.png'), fullPage: true});
   await page.evaluate(() => { window.navigationSentinel = 'same-document'; });
   const nav = page.locator('.md-sidebar--primary');
   const links = nav.locator('a.md-nav__link[href]');
@@ -34,10 +44,13 @@ try {
     if ((await link.getAttribute('href'))?.includes('#')) continue;
     assert.equal(await link.locator('svg').count(), 1, `missing navigation icon: ${await link.innerText()}`);
   }
-  await page.screenshot({path: path.join(output, 'overview-desktop.png'), fullPage: true});
   await nav.getByRole('link', {name: 'Core API', exact: true}).click();
   await page.waitForURL(origin + 'api/core/');
   await page.locator('article h1').filter({hasText: /^Core API/}).waitFor();
+  await expectScheme(page, 'slate');
+  await page.screenshot({path: path.join(output, 'core-api-dark-desktop.png'), fullPage: true});
+  await page.getByTitle('Switch to light mode', {exact: true}).click();
+  await expectScheme(page, 'default');
   assert.equal(await page.evaluate(() => window.navigationSentinel), 'same-document', 'navigation reloaded the page');
   await page.screenshot({path: path.join(output, 'core-api-desktop.png'), fullPage: true});
   await page.setViewportSize({width: 1440, height: 600});
@@ -65,6 +78,17 @@ try {
   await mobile.setViewportSize({width: 390, height: 844});
   await mobile.goto(origin + 'api/http/');
   await mobile.waitForFunction(() => typeof document$ !== 'undefined');
+  await expectScheme(mobile, 'default');
+  // A fresh visit should honor a dark system preference without a saved override.
+  await mobile.evaluate(() => localStorage.clear());
+  await mobile.emulateMedia({colorScheme: 'dark'});
+  await mobile.reload();
+  await expectScheme(mobile, 'slate');
+  await mobile.screenshot({path: path.join(output, 'http-api-dark-mobile.png'), fullPage: true});
+  await mobile.getByTitle('Switch to light mode', {exact: true}).click();
+  await expectScheme(mobile, 'default');
+  await mobile.reload();
+  await expectScheme(mobile, 'default');
   await mobile.screenshot({path: path.join(output, 'http-api-mobile.png'), fullPage: true});
   assert.ok(await mobile.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'mobile page overflows horizontally');
   await mobile.locator('.md-header label[for="__drawer"]').click();
@@ -73,7 +97,7 @@ try {
   await mobile.locator('article h1').filter({hasText: /^Avatar options/}).waitFor();
   assert.deepEqual(errors, [], 'browser errors');
   assert.deepEqual(missing, [], 'missing built assets');
-  console.log('PASS: icons, instant navigation, sidebar scroll, browser history, style references and mobile layout');
+  console.log('PASS: color preferences, theme toggle and persistence, icons, instant navigation, sidebar scroll, browser history, style references and mobile layout');
 } catch (error) {
   if (lastPage) {
     await lastPage.screenshot({path: path.join(output, 'failure.png'), fullPage: true}).catch(() => {});
