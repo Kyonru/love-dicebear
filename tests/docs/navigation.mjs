@@ -9,6 +9,7 @@ const origin = 'https://kyonru.github.io/love-dicebear/';
 const output = path.join(root, 'test-output/docs');
 await mkdir(output, {recursive: true});
 const browser = await chromium.launch({headless: true});
+let lastPage;
 try {
   const context = await browser.newContext({viewport: {width: 1440, height: 900}});
   const errors = [], missing = [];
@@ -22,6 +23,7 @@ try {
     catch { missing.push(relative); await route.fulfill({status: 404, body: 'Not found'}); }
   });
   const page = await context.newPage();
+  lastPage = page;
   page.on('pageerror', error => errors.push(error.message));
   await page.goto(origin);
   await page.waitForFunction(() => typeof document$ !== 'undefined');
@@ -35,7 +37,7 @@ try {
   await page.screenshot({path: path.join(output, 'overview-desktop.png'), fullPage: true});
   await nav.getByRole('link', {name: 'Core API', exact: true}).click();
   await page.waitForURL(origin + 'api/core/');
-  await page.getByRole('heading', {name: 'Core API', exact: true}).waitFor();
+  await page.locator('article h1').filter({hasText: /^Core API/}).waitFor();
   assert.equal(await page.evaluate(() => window.navigationSentinel), 'same-document', 'navigation reloaded the page');
   await page.screenshot({path: path.join(output, 'core-api-desktop.png'), fullPage: true});
   await page.setViewportSize({width: 1440, height: 600});
@@ -44,20 +46,21 @@ try {
   const scrollBefore = await nav.locator('.md-sidebar__scrollwrap').evaluate(el => el.scrollTop);
   await httpLink.click();
   await page.waitForURL(origin + 'api/http/');
-  await page.getByRole('heading', {name: 'HTTP API', exact: true}).waitFor();
+  await page.locator('article h1').filter({hasText: /^HTTP API/}).waitFor();
   const scrollAfter = await nav.locator('.md-sidebar__scrollwrap').evaluate(el => el.scrollTop);
   assert.ok(Math.abs(scrollAfter - scrollBefore) <= 2, `sidebar scroll changed: ${scrollBefore} -> ${scrollAfter}`);
   assert.equal(await page.evaluate(() => window.navigationSentinel), 'same-document');
   await page.goBack();
-  await page.getByRole('heading', {name: 'Core API', exact: true}).waitFor();
+  await page.locator('article h1').filter({hasText: /^Core API/}).waitFor();
   assert.equal(await page.evaluate(() => window.navigationSentinel), 'same-document', 'history navigation reloaded');
   await nav.getByRole('link', {name: 'Styles and their options', exact: true}).click();
   await page.locator('article a').filter({hasText: /^bottts$/}).click();
   await page.waitForURL(origin + 'styles/bottts/');
-  await page.getByRole('heading', {name: 'bottts', exact: true}).waitFor();
+  await page.locator('article h1').filter({hasText: /^bottts/}).waitFor();
   assert.ok((await page.locator('article').innerText()).includes('eyesVariant'));
   assert.equal(await page.evaluate(() => window.navigationSentinel), 'same-document');
   const mobile = await context.newPage();
+  lastPage = mobile;
   await mobile.setViewportSize({width: 390, height: 844});
   await mobile.goto(origin + 'api/http/');
   await mobile.waitForFunction(() => typeof document$ !== 'undefined');
@@ -66,10 +69,16 @@ try {
   await mobile.locator('label[for="__drawer"]').first().click();
   await mobile.screenshot({path: path.join(output, 'navigation-mobile.png')});
   await mobile.locator('.md-sidebar--primary').getByRole('link', {name: 'Avatar options', exact: true}).click();
-  await mobile.getByRole('heading', {name: 'Avatar options', exact: true}).waitFor();
+  await mobile.locator('article h1').filter({hasText: /^Avatar options/}).waitFor();
   assert.deepEqual(errors, [], 'browser errors');
   assert.deepEqual(missing, [], 'missing built assets');
   console.log('PASS: icons, instant navigation, sidebar scroll, browser history, style references and mobile layout');
+} catch (error) {
+  if (lastPage) {
+    await lastPage.screenshot({path: path.join(output, 'failure.png'), fullPage: true}).catch(() => {});
+    console.error('Page diagnostics:', await lastPage.locator('article').innerText().catch(() => 'unavailable'));
+  }
+  throw error;
 } finally {
   await browser.close();
 }
