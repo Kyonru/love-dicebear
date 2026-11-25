@@ -6,22 +6,38 @@ repo_url = "https://github.com/Kyonru/love-dicebear"
 repo_name = "Kyonru/love-dicebear"
 docs_dir = "docs"
 site_dir = "site"
+not_in_nav = "styles/*.md"
+extra_css = ["assets/stylesheets/docs.css"]
 nav = [
   { "Overview" = "index.md" },
-  { "Getting started" = "getting-started.md" },
-  { "Customization" = "customization.md" },
-  { "Options reference" = "options.md" },
-  { "Rendering" = [
-    { "Local SVG with ThorVG" = "thorvg.md" },
-    { "HTTP PNGs and caching" = "http.md" },
+  { "Guides" = [
+    { "Getting started" = "getting-started.md" },
+    { "Build an editor" = "customization.md" },
+    { "Local SVG rendering" = "thorvg.md" },
+    { "HTTP and caching" = "http.md" },
   ] },
-  { "Styles and licenses" = [
-    { "Style catalog" = "styles.md" },
-    { "Third-party notices" = "third-party.md" },
+  { "API reference" = [
+    { "Core API" = "api/core.md" },
+    { "Avatar options" = "options.md" },
+    { "ThorVG adapter" = "api/thorvg.md" },
+    { "HTTP API" = "api/http.md" },
   ] },
-  { "Development" = "development.md" },
-  { "Documentation maintenance" = "documentation.md" },
+  { "Catalog" = [
+    { "Styles and their options" = "styles.md" },
+    { "Licenses and notices" = "third-party.md" },
+  ] },
+  { "Project" = [
+    { "Development" = "development.md" },
+    { "Documentation" = "documentation.md" },
+  ] },
 ]
 
 [project.theme]
-features = ["navigation.sections", "navigation.footer", "content.code.copy"]
+features = [
+  "navigation.instant", "navigation.instant.progress",
+  "navigation.sections", "navigation.expand", "navigation.footer",
+  "content.code.copy", "toc.follow",
+]
+
+[project.theme.icon]
+logo = "lucide/dices"
