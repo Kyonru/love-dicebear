@@ -39,3 +39,4 @@ Generated from the pinned upstream definitions. Artwork licenses are independent
 | `lorelei-neutral` | Lisa Wischofsky | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/lorelei-neutral.json) |
 | `lorelei` | Lisa Wischofsky | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/lorelei.json) |
 | `marbles` | DiceBear | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/marbles.json) |
+| `micah` | Micah Lanier | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/micah.json) |
