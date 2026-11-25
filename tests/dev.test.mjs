@@ -1,9 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdir, mkdtemp, writeFile, readFile, readdir, rm, access } from 'node:fs/promises';
+import { mkdir, mkdtemp, writeFile, readFile, readdir, realpath, rm, access, copyFile } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
-import { ensureRenderer, findLove, targetFor } from '../scripts/dev.mjs';
+import { ensureRenderer, findLove, targetFor, rendererFor } from '../scripts/dev.mjs';
 
 async function temporary(t) {
   const root = await mkdtemp(join(tmpdir(), 'love-dicebear-dev-test-'));
@@ -17,6 +18,29 @@ test('selects supported native packages and rejects unsupported platforms', () =
   assert.equal(targetFor('linux','x64').binary, 'liblove_thorvg.so');
   assert.equal(targetFor('win32','x64').binary, 'love_thorvg.dll');
   assert.throws(() => targetFor('linux','arm64'), /No prebuilt/);
+});
+
+test('selects HTTP without requiring a ThorVG setup and validates renderer arguments', () => {
+  assert.equal(rendererFor([]),'thorvg');
+  assert.equal(rendererFor(['--style','initials','--renderer','http']),'http');
+  assert.equal(rendererFor(['--http-test']),'http');
+  assert.throws(() => rendererFor(['--renderer']), /must be/);
+  assert.throws(() => rendererFor(['--renderer','unknown']), /must be/);
+});
+
+test('HTTP launcher forwards game arguments without installing ThorVG', {skip:process.platform === 'win32'}, async t => {
+  const root = await temporary(t);
+  await mkdir(join(root,'scripts'));
+  await copyFile(new URL('../scripts/dev.mjs',import.meta.url),join(root,'scripts/dev.mjs'));
+  const executable = join(root,'fake-love');
+  const capture = join(root,'arguments.json');
+  await writeFile(executable, '#!/usr/bin/env node\nrequire("node:fs").writeFileSync(process.env.LOVE_TEST_CAPTURE,JSON.stringify(process.argv.slice(2)));\n', {mode:0o755});
+  const run = spawnSync(process.execPath,[join(root,'scripts/dev.mjs'),'--renderer','http','--style','initials'], {
+    encoding:'utf8',timeout:5000,env:{...process.env,LOVE:executable,LOVE_TEST_CAPTURE:capture},
+  });
+  assert.equal(run.status,0,run.stderr || run.error?.message);
+  assert.deepEqual(JSON.parse(await readFile(capture,'utf8')),[await realpath(root),'--renderer','http','--style','initials']);
+  await assert.rejects(access(join(root,'love_thorvg')));
 });
 
 test('reuses an existing renderer without reading or downloading an archive', async t => {

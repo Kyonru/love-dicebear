@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { access, copyFile, lstat, mkdir, mkdtemp, readFile, rename, rm, writeFile } from 'node:fs/promises';
+import { access, copyFile, lstat, mkdir, mkdtemp, readFile, realpath, rename, rm, writeFile } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { dirname, delimiter, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -108,12 +108,22 @@ export async function findLove(env = process.env) {
   throw new Error('LÖVE was not found. Install LÖVE 11.x from https://love2d.org or set LOVE to its executable path.');
 }
 
+export function rendererFor(args) {
+  if (args.includes('--http-test')) return 'http';
+  const index = args.indexOf('--renderer');
+  const renderer = index < 0 ? 'thorvg' : args[index + 1];
+  if (!['thorvg','http'].includes(renderer)) throw new Error('--renderer must be thorvg or http');
+  return renderer;
+}
+
 async function main() {
   const args = process.argv.slice(2);
   if (args.includes('--help')) {
     console.log('npm run dev                 Install renderer if missing, then launch LÖVE\n'
       + 'npm run setup               Install renderer without launching\n'
       + 'npm run dev -- --render-test Run native rendering checks\n'
+      + 'npm run dev -- --renderer http Use API PNGs (requires curl; skips ThorVG setup)\n'
+      + 'npm run dev -- --renderer http --cache Enable URL-keyed PNG caching\n'
       + 'LOVE=/path/to/love          Override the LÖVE executable\n'
       + 'LOVE_THORVG_ARCHIVE=/file.zip Use a downloaded release (checksum verified)');
     return;
@@ -122,7 +132,12 @@ async function main() {
   if (setup && args.length > 1) throw new Error('--setup does not take additional arguments.');
   const executable = setup ? undefined : await findLove();
   const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-  await ensureRenderer(root);
+  if (setup || rendererFor(args) === 'thorvg') await ensureRenderer(root);
+  else {
+    const curl = spawnSync(process.platform === 'win32' ? 'curl.exe' : 'curl', ['--version'], {encoding:'utf8'});
+    if (curl.error || curl.status !== 0) throw new Error('HTTP mode requires curl on PATH. Install curl, then run npm run dev again.');
+    console.log('Using HTTP PNG rendering; ThorVG is not required.');
+  }
   if (setup) return;
   console.log(`Starting ${executable}`);
   const child = spawnSync(executable, [root, ...args], {cwd:root, stdio:'inherit'});
@@ -130,6 +145,7 @@ async function main() {
   process.exitCode = child.status ?? 1;
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+const entry = process.argv[1] && await realpath(resolve(process.argv[1])).catch(() => null);
+if (entry && import.meta.url === pathToFileURL(entry).href) {
   main().catch(error => { console.error(error.message); process.exitCode = 1; });
 }
