@@ -42,3 +42,4 @@ Generated from the pinned upstream definitions. Artwork licenses are independent
 | `micah` | Micah Lanier | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/micah.json) |
 | `miniavs` | Webpixels | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/miniavs.json) |
 | `moods` | DiceBear | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/moods.json) |
+| `notionists` | Zoish | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/notionists.json) |
