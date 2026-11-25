@@ -8,6 +8,8 @@ local counter = 0
 function M.new(style, options, renderOptions)
   assert(love and love.filesystem, 'love_dicebear.thorvg requires LÖVE')
   local svg, resolved = dicebear.generate(style, options)
+  assert(not svg:find('<text[%s>]'),
+    'love-thorvg v0.2.0 does not reliably render SVG text; use dicebear.generate() and another renderer for this avatar')
   local thorvg = require('love_thorvg')
   local directory = 'love-dicebear-temp'
   assert(love.filesystem.createDirectory(directory), 'could not create SVG staging directory')
