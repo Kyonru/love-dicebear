@@ -24,6 +24,19 @@ assert(editor.rows[1].name == 'eyesVariant')
 local eyes = state.eyesVariant
 select('mouthVariant'); editor:adjust(1)
 assert(input.mouthVariant and input.mouthProbability == 100 and state.eyesVariant == eyes)
+local mouth = state.mouthVariant
+local visibleSvg = dicebear.generate('bottts', input)
+typeValue('None')
+assert(input.mouthProbability == 0 and state.mouthVariant == mouth)
+assert(editor:value(editor.rows[editor.selected]) == 'None')
+local hiddenSvg = dicebear.generate('bottts', input)
+assert(hiddenSvg ~= visibleSvg and hiddenSvg == dicebear.generate('bottts', state))
+editor:adjust(1)
+assert(state.mouthProbability == 100 and state.mouthVariant == editor.rows[editor.selected].spec.values[1])
+editor:adjust(-1); assert(state.mouthProbability == 0, 'cycling backward should offer None')
+editor:adjust(-1); assert(state.mouthProbability == 100, 'cycling backward from None should restore a variant')
+typeValue('None'); editor:keypressed('backspace')
+assert(input.mouthVariant == nil and input.mouthProbability == nil, 'reset should restore seeded visibility')
 select('topProbability'); typeValue('0'); assert(state.topProbability == 0)
 select('baseColor'); typeValue('#abc'); assert(state.baseColor == '#aabbcc')
 select('backgroundColor'); typeValue('transparent'); assert(type(state.backgroundColor) == 'table')
@@ -41,6 +54,11 @@ editor:textinput('Adaé'); editor:keypressed('backspace')
 assert(editor.input == 'Ada')
 assert(editor:keypressed('s') and edits == before, 'editing text leaked an application shortcut')
 editor:keypressed('return'); assert(state.seed == 'Ada')
+setup('bottts', 'http')
+select('mouthVariant'); typeValue('None')
+assert(input.mouthProbability == 0)
+assert(require('love_dicebear.http').url('bottts', input):find('mouthProbability=0', 1, true))
+editor:adjust(1); assert(state.mouthProbability == 100)
 setup('initials', 'http')
 select('fontFamily'); before = edits; editor:adjust(1)
 assert(edits == before and editor.message:find('local%-only'))
@@ -57,6 +75,12 @@ for _, style in ipairs(dicebear.styles()) do
     if row.spec.type == 'variant' or row.spec.type == 'color' or row.spec.type == 'enum' then
       editor:select(i); editor:adjust(1)
       assert(not editor.message, style .. '/' .. row.name .. ': ' .. tostring(editor.message))
+      if row.spec.type == 'variant' then
+        typeValue('None')
+        assert(not editor.message and state[row.name:gsub('Variant$', 'Probability')] == 0, style .. '/' .. row.name)
+        editor:adjust(1)
+        assert(not editor.message and state[row.name:gsub('Variant$', 'Probability')] == 100)
+      end
     end
   end
 end

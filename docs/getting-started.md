@@ -117,7 +117,9 @@ The settings panel is generated from each style's descriptors. It exposes
 component variants and visibility, colors (including `transparent`), rotation,
 scale, translation, corner radius, flip, output size, seed, and text settings.
 Click a row to select it, use its **− / +** buttons to adjust it, or click the
-value to type directly. Selecting a variant makes that component visible.
+value to type directly. Cycle a component to **None** (or type `None`) to hide it.
+Selecting a variant makes it visible again. Backspace on a component resets both
+its variant and visibility to the seeded defaults.
 Invalid values keep the current avatar and show an error beside the editor.
 
 HTTP mode marks alias overrides, title, and font settings as local-only and

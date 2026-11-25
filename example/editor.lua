@@ -6,6 +6,7 @@ Editor.__index = Editor
 local fallbackColors = {'#ffffff', '#111827', '#448ef4', '#d95c9a', '#e8edf2', '#fbbf24', '#22c55e'}
 local steps = {rotate = 5, scale = 0.1, translateX = 5, translateY = 5, borderRadius = 1, size = 16, fontWeight = 100}
 local visibleRows, rowHeight = 7, 36
+local none = {} -- Editor-only choice; the library receives probability = 0.
 
 local function trimLast(text)
   local index = #text
@@ -51,6 +52,8 @@ end
 
 function Editor:value(row)
   local value = self.resolved[row.name]
+  if row.spec.type == 'variant' and (self.resolved[row.name:gsub('Variant$', 'Probability')] == 0
+    or type(value) == 'table') then return 'None' end
   if type(value) == 'table' then return row.spec.type == 'color' and 'transparent' or '(hidden)' end
   return value == nil and '(default)' or tostring(value)
 end
@@ -66,10 +69,15 @@ function Editor:apply(value, reset)
   local row = self.rows[self.selected]
   if not self:isEnabled(row) then self.message = 'This setting is local-only.'; return false end
   local edited = copy(self.requested)
-  edited[row.name] = value
-  if not reset and row.spec.type == 'variant' then
-    edited[row.name:gsub('Variant$', 'Probability')] = 100
-  end
+  if row.spec.type == 'variant' then
+    local probability = row.name:gsub('Variant$', 'Probability')
+    if value == none then
+      edited[probability] = 0 -- Retain the chosen variant while hidden.
+    else
+      edited[row.name] = value
+      if reset then edited[probability] = nil else edited[probability] = 100 end
+    end
+  else edited[row.name] = value end
   local ok, err = pcall(dicebear.resolve, self.description.name, edited)
   if ok and self.renderer == 'http' then ok, err = pcall(require('love_dicebear.http').url, self.description.name, edited) end
   if not ok then self.message = tostring(err); return false end
@@ -92,7 +100,13 @@ function Editor:adjust(direction)
   local spec, value = row.spec, self.resolved[row.name]
   if spec.type == 'variant' or spec.type == 'enum' or spec.type == 'color' then
     local choices = copy(spec.values or (#spec.palette > 0 and spec.palette or fallbackColors))
-    if spec.type == 'color' then choices[#choices + 1] = 'transparent' end
+    if spec.type == 'variant' then
+      choices[#choices + 1] = none
+      if self:value(row) == 'None' then value = none end
+    elseif spec.type == 'color' then
+      choices[#choices + 1] = 'transparent'
+      if type(value) == 'table' then value = 'transparent' end
+    end
     if #choices == 0 then return end
     local current = direction > 0 and 0 or 1
     for i, choice in ipairs(choices) do if choice == value then current = i; break end end
@@ -117,6 +131,7 @@ function Editor:keypressed(key)
       if row.spec.type == 'number' or row.spec.type == 'range' then
         value = tonumber(value)
         if not value then self.message = 'Enter a number.'; return true end
+      elseif row.spec.type == 'variant' and value == 'None' then value = none
       elseif row.spec.type == 'color' and value:lower() == 'transparent' then value = {} end
       if self:apply(value) then self.input = nil end
     end
