@@ -122,6 +122,7 @@ async function main() {
     console.log('npm run dev                 Install renderer if missing, then launch LÖVE\n'
       + 'npm run setup               Install renderer without launching\n'
       + 'npm run dev -- --render-test Run native rendering checks\n'
+      + 'npm run dev -- --style initials --font examples/fonts/Abel-Regular.ttf  Preview SVG text (updated ThorVG required)\n'
       + 'npm run dev -- --renderer http Use API PNGs (requires curl; skips ThorVG setup)\n'
       + 'npm run dev -- --renderer http --cache Enable URL-keyed PNG caching\n'
       + 'LOVE=/path/to/love          Override the LÖVE executable\n'

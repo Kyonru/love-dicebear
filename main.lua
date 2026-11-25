@@ -8,6 +8,7 @@ local previewNotice
 local description = dicebear.describe(styleName)
 local variants = dicebear.describe('bottts').options.eyesVariant.values
 local renderer = 'thorvg'
+local fontPath
 local requested, pending, statusMessage, smoke
 local cacheEnabled, forceRefresh = false, false
 local lifetimes = {{label = '5 minutes', seconds = 300}, {label = '1 hour', seconds = 3600}, {label = '24 hours', seconds = 86400}}
@@ -33,15 +34,18 @@ end
 local function rebuild(options)
   local nextDocument, nextState
   requested, pending, statusMessage, forceRefresh = copy(options), nil, nil, false
-  previewNotice = renderer == 'thorvg' and require('love_dicebear.thorvg_support')[styleName] or nil
+  previewNotice = renderer == 'thorvg' and not fontPath and require('love_dicebear.thorvg_support')[styleName] or nil
   if renderer == 'http' then
     nextState = dicebear.resolve(styleName, options)
     pending, previewNotice = 0.2, 'Downloading PNG…'
   elseif previewNotice then
     nextState = dicebear.resolve(styleName, options)
   else
-    nextDocument, nextState = require('love_dicebear.thorvg').new(
-      styleName, options, {width = 256, height = 256})
+    local fonts = fontPath and {['system-ui'] = fontPath} or nil
+    local ok, result, resolved = pcall(require('love_dicebear.thorvg').new,
+      styleName, options, {width = 256, height = 256, fonts = fonts})
+    if ok then nextDocument, nextState = result, resolved
+    else nextState, previewNotice = dicebear.resolve(styleName, options), tostring(result) end
   end
   if document then document:release() end
   document, state = nextDocument, nextState
@@ -54,13 +58,14 @@ function love.load(args)
     smoke = require('tests.http_live').new()
     return
   end
-  if args[1] == '--test' or args[1] == '--render-test' or args[1] == '--catalog-render-test' or args[1] == '--parity' then
+  if args[1] == '--test' or args[1] == '--render-test' or args[1] == '--font-test' or args[1] == '--catalog-render-test' or args[1] == '--parity' then
     local ok, err = pcall(function()
       require('tests.run')
       require('tests.adapter')
       require('tests.http_url')
       require('tests.http')
       require('tests.http_worker')
+      if args[1] == '--font-test' then require('tests.font_render')() end
       if args[1] == '--render-test' then require('tests.render')() end
       if args[1] == '--catalog-render-test' then require('tests.catalog_render')() end
       if args[1] == '--parity' then
@@ -79,6 +84,7 @@ function love.load(args)
       assert(renderer == 'thorvg' or renderer == 'http', '--renderer must be thorvg or http')
     end
     if arg == '--cache' then cacheEnabled = true end
+    if arg == '--font' then fontPath = assert(args[i + 1], '--font requires a path inside the game') end
   end
   selectStyle(styleName)
   love.window.setTitle('love-dicebear / Style catalog')

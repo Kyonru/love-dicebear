@@ -37,3 +37,13 @@ The initials implementation uses generated Unicode 17.0 letter/mark categories
 and uppercase mappings. See `vendor/UNICODE-LICENSE`. The generation script uses
 Node's Unicode implementation only at development time; the resulting tables
 are bundled for consistent behavior across Lua runtimes.
+
+## Example font (not included in library ZIPs)
+
+`examples/fonts/Abel-Regular.ttf` is Abel Regular by MADType, distributed under
+the SIL Open Font License 1.1. The complete notice is in `examples/fonts/OFL.txt`.
+Source: https://github.com/google/fonts/tree/main/ofl/abel
+
+This font is used only by the optional SVG text example and native rendering
+tests. Applications supply and license their own fonts; the runtime library
+does not bundle or download one.

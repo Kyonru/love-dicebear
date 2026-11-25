@@ -2,7 +2,7 @@
 local dicebear = require('love_dicebear')
 local oldLove, oldAdapter = love, package.loaded['love_dicebear.thorvg']
 local oldHttp = package.loaded['love_dicebear.http']
-local saved, settings, savedPath, lastRequest, clearedUrl
+local saved, settings, savedPath, lastRequest, clearedUrl, renderSettings
 local ok, message = pcall(function()
   love = {
     window = {setTitle = function() end},
@@ -16,7 +16,8 @@ local ok, message = pcall(function()
       getSaveDirectory = function() return '/example-save-directory' end,
     },
   }
-  package.loaded['love_dicebear.thorvg'] = {new = function(style, input)
+  package.loaded['love_dicebear.thorvg'] = {new = function(style, input, config)
+    renderSettings = config
     settings = dicebear.resolve(style, input)
     return {release = function() end}, settings
   end}
@@ -74,6 +75,10 @@ local ok, message = pcall(function()
   previous = lastRequest
   love.keypressed('h'); love.keypressed('s')
   assert(previous.released and savedPath == 'avatar.svg', 'renderer switch did not release HTTP image or restore SVG saving')
+  love.load({'--style', 'initials', '--font', 'examples/fonts/Abel-Regular.ttf'})
+  assert(renderSettings.fonts['system-ui'] == 'examples/fonts/Abel-Regular.ttf', 'example did not pass the supplied font')
+  love.keypressed('s')
+  assert(savedPath == 'avatar.svg')
 end)
 love, package.loaded['love_dicebear.thorvg'] = oldLove, oldAdapter
 package.loaded['love_dicebear.http'] = oldHttp
