@@ -16,6 +16,7 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: ${{ matrix.lua }} tests/run.lua
       - run: ${{ matrix.lua }} tests/adapter.lua
+      - run: ${{ matrix.lua }} tests/save.lua
       - run: npm test
         env:
           LUA: ${{ matrix.lua }}

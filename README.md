@@ -134,13 +134,15 @@ create the replacement document, then release the old one. Do not generate or
 rasterize the avatar every `love.draw` call.
 
 Run `love .` from this repository for a small example: Left/Right changes eyes
-without changing other features, R generates a new avatar, and S saves SVG.
+without changing other features, R generates a new avatar, and S saves
+`avatar.svg` in LÖVE's save directory (the full path is printed to the console).
 
 ## Development
 
 ```sh
 lua tests/run.lua
 lua tests/adapter.lua
+lua tests/save.lua
 npm ci --ignore-scripts
 npm test
 love . --test

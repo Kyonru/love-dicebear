@@ -39,7 +39,8 @@ function love.keypressed(key)
   elseif key == 'r' then
     rebuild({seed = tostring(love.timer.getTime()), backgroundColor = 'e8edf2', borderRadius = 12})
   elseif key == 's' then
-    assert(love.filesystem.write('avatar.svg', dicebear.generate('bottts', state)))
+    local svg = dicebear.generate('bottts', state)
+    assert(love.filesystem.write('avatar.svg', svg))
     print('Saved ' .. love.filesystem.getSaveDirectory() .. '/avatar.svg')
   elseif key == 'escape' then love.event.quit() end
 end
