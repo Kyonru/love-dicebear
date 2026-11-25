@@ -20,6 +20,19 @@ jobs:
       - run: python -m pip install -r requirements-docs.txt
       - run: python scripts/prepare_docs.py
       - run: zensical build --clean --strict
+      - run: python tests/docs/check_reference.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci --prefix tests/docs --ignore-scripts
+      - run: tests/docs/node_modules/.bin/playwright install --with-deps chromium
+      - run: npm test --prefix tests/docs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: documentation-previews
+          path: test-output/docs
+          if-no-files-found: ignore
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         with:
