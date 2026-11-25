@@ -1,6 +1,17 @@
+---
+icon: lucide/image
+---
 # Local rendering with love-thorvg
+
+Use ThorVG to preview locally generated SVGs without a server. For constructor
+settings and Document methods, see the [adapter API](api/thorvg.md).
+
+## Install the renderer
+
 Install its complete `love_thorvg/` directory beside `love_dicebear/`, including
 the native binary for your platform. See its README for distribution details.
+
+## Draw an avatar
 
 ```lua
 local avatars = require('love_dicebear.thorvg')
@@ -74,6 +85,8 @@ actual font face you need; browser-like fallback and automatic weight/style
 matching are not provided. These tests verify visible text and lifecycle;
 other renderer differences in filters, blending, or masking remain outside
 byte-level SVG generator parity.
+
+## Update a preview
 
 Keep the returned document between frames. When an editor changes settings,
 create the replacement document, then release the old one. Do not generate or

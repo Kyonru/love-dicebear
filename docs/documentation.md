@@ -1,3 +1,6 @@
+---
+icon: lucide/book-open
+---
 # Documentation maintenance
 
 The site is built with [Zensical](https://zensical.org/) and published at
@@ -51,3 +54,29 @@ job has Pages and OIDC write permissions, and deployments run one at a time.
 
 See [Zensical's publishing guide](https://zensical.org/docs/publish-your-site/)
 for the underlying GitHub Pages integration.
+
+## Navigation and reference checks
+
+The theme uses `navigation.instant` to fetch internal pages without reloading
+the browser document. Keep `site_url` set to the GitHub Pages project URL.
+Each source page has a Lucide `icon` in its front matter; the preparation script
+adds icons to generated pages. No custom client-side router is needed.
+
+The preparation script also generates `docs/styles/` from the 63 pinned style
+JSON definitions. Edit the canonical definitions through the normal import
+workflow, not generated documentation. The core API describes shared options;
+these pages enumerate the style-specific choices.
+
+The docs workflow runs browser checks before deploying: navigation icons,
+instant page changes, retained sidebar scrolling, history, style links, and
+mobile layout. Screenshots are attached as `documentation-previews` artifacts.
+To run those checks locally after building:
+
+```sh
+npm ci --prefix tests/docs --ignore-scripts
+tests/docs/node_modules/.bin/playwright install chromium
+npm test --prefix tests/docs
+```
+
+The browser test serves the built files through request interception at the real
+Pages URL, so it does not need a local server or change the published site.

@@ -1,3 +1,6 @@
+---
+icon: lucide/house
+---
 # love-dicebear
 Generate customizable [DiceBear](https://www.dicebear.com/) avatars locally in
 Lua and LÖVE. Includes **all 63 styles** from the pinned DiceBear catalog,
@@ -30,3 +33,13 @@ local avatars, or the HTTP adapter when you want server-rendered PNGs.
 
 See [development](development.md) for tests and [documentation maintenance](documentation.md)
 for local previews and GitHub Pages deployment.
+
+## API reference
+
+- [Core API](api/core.md): generate, resolve, inspect styles, and save deterministic settings.
+- [Avatar options](options.md): all shared settings, bounds, defaults, and accepted forms.
+- [ThorVG adapter](api/thorvg.md): construction, supplied fonts, and Document methods.
+- [HTTP API](api/http.md): URLs, request lifecycle, saving, caching, and errors.
+
+Each entry in the [style catalog](styles.md) links to the style’s exact component
+names, variants, probability defaults, aliases, tags, and color palettes.

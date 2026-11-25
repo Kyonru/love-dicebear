@@ -1,4 +1,14 @@
+---
+icon: lucide/cloud-download
+---
 # HTTP rendering and caching
+
+Download a PNG asynchronously, display it as a normal LÖVE Image, and optionally
+reuse it from disk. This desktop backend uses system `curl` in a worker thread.
+For every setting and request method, see the [HTTP API reference](api/http.md).
+
+## Display and save a PNG
+
 ```lua
 local http = require('love_dicebear.http')
 local avatar
@@ -30,10 +40,14 @@ function love.quit()
 end
 ```
 
+## Image ownership
+
 `getImage()` returns an ordinary `love.graphics.Image` once ready, so you can
 also pass it to your own draw/UI code. The request owns that image: `release()`
 releases it. `save(path)` writes the original PNG bytes without re-encoding;
 it returns `nil, message` while the image is unavailable or if writing fails.
+
+## Loading and errors
 
 Call `update()` until `getStatus()` is `ready` or `error`. Other states are
 `queued`, `loading`, and `cancelled`. `getError()` exposes download or decode
@@ -48,7 +62,7 @@ directory. It is not a web/mobile transport. The live download, image draw,
 save, and cache tests have been verified on macOS. Temporary request files are
 cleaned on completion or handled failure.
 
-### Optional URL cache
+## Optional URL cache
 
 - `cache = true`: enable a disk cache with a 24-hour lifetime.
 - `cache = {ttl = 3600}`: set a lifetime in seconds, at least 1.
@@ -65,7 +79,7 @@ Cache-write errors do not prevent displaying or explicitly saving a downloaded
 image. There is no automatic cache size budget or global eviction policy;
 games can manage that policy or leave caching disabled and own their cache.
 
-### API options and hosting
+## API options and hosting
 
 The default endpoint is `https://api.dicebear.com/10.x`. To use a self-hosted
 instance, pass `{baseUrl = 'https://avatars.example.com/10.x'}` as the third

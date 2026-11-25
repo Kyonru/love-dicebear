@@ -1,3 +1,6 @@
+---
+icon: lucide/wrench
+---
 # Development
 ```sh
 lua tests/run.lua
