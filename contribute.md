@@ -143,23 +143,23 @@ portable archive, because the Lua library does not bundle native dependencies.
 
 1. Set `version` in `love_dicebear/init.lua` to the intended release version.
 2. Update the guides for any API changes and run the relevant tests above.
-3. Validate and inspect a local package (replace `v0.2.0` with your version):
+3. Validate and inspect a local package (replace `v1.0.0` with your version):
 
    ```sh
    python3 tests/release.py
-   python3 scripts/package_release.py --version v0.2.0
+   python3 scripts/package_release.py --version v1.0.0
    ```
 
 4. Commit the changes, then push the release commit and matching tag:
 
    ```sh
    git push origin main
-   git -c tag.gpgSign=false tag -a v0.2.0 -m "love-dicebear v0.2.0"
-   git push origin v0.2.0
+   git -c tag.gpgSign=false tag -a v1.0.0 -m "love-dicebear v1.0.0"
+   git push origin v1.0.0
    ```
 
 The tag must match the Lua version exactly (with a leading `v`). Prerelease tags
-such as `v0.3.0-rc.1` produce GitHub prereleases. Creating the tag publishes a
+such as `v1.1.0-rc.1` produce GitHub prereleases. Creating the tag publishes a
 release automatically after the full Lua/parity suite and packaging tests pass.
 No release is created by an ordinary branch push.
 

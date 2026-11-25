@@ -27,7 +27,10 @@ See the [editor guide](https://kyonru.github.io/love-dicebear/customization/).
 The core generator needs no network access or additional dependencies.
 This archive includes adapter code, but does not bundle their dependencies:
 
-- **Local SVG rendering:** install [love-thorvg](https://github.com/Kyonru/love-thorvg)
+- **Bring your own renderer:** pass the generated SVG string to your chosen SVG
+  library. No registration or ThorVG-compatible interface is required. See the
+  [BYOR guide](https://kyonru.github.io/love-dicebear/renderers/).
+- **Local SVG rendering with ThorVG:** install [love-thorvg](https://github.com/Kyonru/love-thorvg)
   separately, beside `love_dicebear/`. See the
   [ThorVG guide](https://kyonru.github.io/love-dicebear/thorvg/) for setup and SVG text limitations.
 - **HTTP PNG rendering:** the HTTP adapter requires desktop LÖVE, system `curl`,

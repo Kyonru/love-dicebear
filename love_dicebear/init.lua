@@ -1,7 +1,7 @@
 local options = require('love_dicebear.options')
 local renderer = require('love_dicebear.renderer')
 local util = require('love_dicebear.util')
-local M = {version = '0.2.0'}
+local M = {version = '1.0.0'}
 local names = require('love_dicebear.styles.registry')
 local available = {}
 for _, name in ipairs(names) do available[name] = true end

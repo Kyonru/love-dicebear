@@ -55,7 +55,7 @@ def package(root, output, tag):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--version", required=True, help="release tag matching the Lua library version, e.g. v0.2.0")
+    parser.add_argument("--version", required=True, help="release tag matching the Lua library version, e.g. v1.0.0")
     parser.add_argument("--output", type=Path, default=ROOT / "dist")
     args = parser.parse_args()
     try:
