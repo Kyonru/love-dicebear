@@ -49,3 +49,17 @@ constrain its aliases, but each alias makes an independent seeded choice.
 alias choices so editors can change an individual repeated shape. Resolved
 settings include these choices and visibility values for reliable round trips.
 Per-component transforms from the definition remain deterministic from the seed.
+
+## Try the descriptor-driven example
+
+Run `npm run dev` and use the **Avatar settings** panel. Every descriptor becomes
+a selectable row: variants and enums cycle through choices, colors cycle through
+palettes or accept a typed hex value, and numeric options use bounded steps or
+exact input. The panel also supports seed, title, and font text fields.
+
+Use Tab to select a setting, Left/Right to change it, and E to type. Enter applies
+typed input; Escape cancels it. Backspace outside text input removes that option's
+explicit override. See [all example controls](getting-started.md#example-controls).
+
+The example's `example/editor.lua` contains the control logic and validation;
+it is separate from the runtime library and excluded from release ZIPs.

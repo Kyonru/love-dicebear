@@ -6,6 +6,7 @@ icon: lucide/wrench
 lua tests/run.lua
 lua tests/adapter.lua
 lua tests/save.lua
+lua tests/editor.lua
 lua tests/http_url.lua
 lua tests/http.lua
 lua tests/http_worker.lua
@@ -13,6 +14,7 @@ npm ci --ignore-scripts
 npm test
 npm run test:dev
 love . --test
+love . --editor-test  # editor UI/input/save smoke test; no renderer needed
 love . --render-test  # requires love_thorvg/
 love . --catalog-render-test  # all 63 with SVG font support; otherwise 61
 love . --font-test  # text pixels, shared ownership, and missing-font errors

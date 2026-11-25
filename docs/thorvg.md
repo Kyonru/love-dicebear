@@ -93,6 +93,6 @@ create the replacement document, then release the old one. Do not generate or
 rasterize the avatar every `love.draw` call.
 
 Run `npm run dev` (or `love .` after setup) for the catalog example: Up/Down changes
-style, Left/Right changes eyes or the first component, and R generates a new
+style, Tab selects an avatar setting and Left/Right changes it, and R generates a new
 avatar. Saved files are written to LÖVE's save directory; the full path is
 printed to the console.

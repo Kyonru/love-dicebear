@@ -95,7 +95,13 @@ Rendering and cache actions are also clickable in the example's side panel.
 | Key | Action |
 | --- | --- |
 | Up / Down | Change style |
-| Left / Right | Change the selected component's variant |
+| Tab / Shift+Tab | Select the next / previous avatar setting |
+| Left / Right | Cycle choices or increase / decrease the selected value |
+| E | Type an exact value (hex color, seed, number, or variant name) |
+| Enter / Escape while typing | Apply / cancel the edit |
+| Backspace outside text input | Reset the selected setting to its default |
+| Page Up / Page Down | Move through settings by a page |
+| Mouse wheel over settings | Move through the settings list |
 | R | Generate a new seeded avatar |
 | H | Switch between local SVG and HTTP PNG rendering |
 | S | Save `avatar.svg` or `avatar.png` to LÖVE's save directory |
@@ -104,6 +110,18 @@ Rendering and cache actions are also clickable in the example's side panel.
 | Enter | Retry or refresh from the HTTP server |
 | Delete | Clear the current URL's cache entry while keeping the preview |
 | Escape | Quit |
+
+The settings panel is generated from each style's descriptors. It exposes
+component variants and visibility, colors (including `transparent`), rotation,
+scale, translation, corner radius, flip, output size, seed, and text settings.
+Click a row to select it, use its **− / +** buttons to adjust it, or click the
+value to type directly. Selecting a variant makes that component visible.
+Invalid values keep the current avatar and show an error beside the editor.
+
+HTTP mode marks alias overrides, title, and font settings as local-only and
+limits size to 256. If existing local options cannot be represented by the API,
+switching to HTTP reports the incompatible setting; reset it first. Font-family
+changes use the font supplied with `--font`; they do not select a different file.
 
 Caching is off by default; `--cache` enables a 24-hour lifetime. The panel shows
 whether the image came from the network or disk. Switching to local rendering
