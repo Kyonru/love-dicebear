@@ -1,12 +1,10 @@
 -- Catalog example: local ThorVG or optional HTTP PNG rendering.
 local dicebear = require('love_dicebear')
-local document, state, variantIndex
+local document, state
 local styleName, styleIndex = 'bottts', 1
 local styles = dicebear.styles()
-local part = 'eyes'
 local previewNotice
 local description = dicebear.describe(styleName)
-local variants = dicebear.describe('bottts').options.eyesVariant.values
 local renderer = 'thorvg'
 local fontPath
 local requested, pending, statusMessage, smoke
@@ -14,21 +12,13 @@ local cacheEnabled, forceRefresh = false, false
 local lifetimes = {{label = '5 minutes', seconds = 300}, {label = '1 hour', seconds = 3600}, {label = '24 hours', seconds = 86400}}
 local lifetimeIndex = 3
 local copy = require('love_dicebear.util').copy
+local editor = require('example.editor').new()
 
 local function selectStyle(name)
   description = dicebear.describe(name)
   styleName = name
   for i, value in ipairs(styles) do if value == name then styleIndex = i end end
-  part = description.options.eyesVariant and 'eyes' or nil
-  if not part then
-    local parts = {}
-    for key, spec in pairs(description.options) do
-      if spec.type == 'variant' and not spec.extends then parts[#parts + 1] = key:sub(1, -8) end
-    end
-    table.sort(parts)
-    part = parts[1]
-  end
-  variants = part and description.options[part .. 'Variant'].values or {}
+  editor:setDescription(description)
 end
 
 local function rebuild(options)
@@ -41,7 +31,7 @@ local function rebuild(options)
   elseif previewNotice then
     nextState = dicebear.resolve(styleName, options)
   else
-    local fonts = fontPath and {['system-ui'] = fontPath} or nil
+    local fonts = fontPath and {[options.fontFamily or 'system-ui'] = fontPath} or nil
     local ok, result, resolved = pcall(require('love_dicebear.thorvg').new,
       styleName, options, {width = 256, height = 256, fonts = fonts})
     if ok then nextDocument, nextState = result, resolved
@@ -49,9 +39,10 @@ local function rebuild(options)
   end
   if document then document:release() end
   document, state = nextDocument, nextState
-  variantIndex = 1
-  for i, variant in ipairs(variants) do if variant == state[part .. 'Variant'] then variantIndex = i end end
+  editor:setState(requested, state, renderer)
 end
+
+editor.onChange = rebuild
 
 function love.load(args)
   if args[1] == '--http-test' then
@@ -62,6 +53,7 @@ function love.load(args)
     local ok, err = pcall(function()
       require('tests.run')
       require('tests.adapter')
+      require('tests.editor')
       require('tests.http_url')
       require('tests.http')
       require('tests.http_worker')
@@ -86,9 +78,11 @@ function love.load(args)
     if arg == '--cache' then cacheEnabled = true end
     if arg == '--font' then fontPath = assert(args[i + 1], '--font requires a path inside the game') end
   end
+  if args[1] == '--editor-test' then styleName, renderer = 'initials', 'thorvg' end
   selectStyle(styleName)
   love.window.setTitle('love-dicebear / Style catalog')
   rebuild({seed = 'hello-love', backgroundColor = 'e8edf2', borderRadius = 12})
+  if args[1] == '--editor-test' then smoke = require('tests.editor_render').new(editor) end
 end
 
 function love.update(dt)
@@ -116,14 +110,8 @@ end
 
 function love.keypressed(key)
   if not state then return end
-  if key == 'right' or key == 'left' then
-    if #variants == 0 then return end
-    variantIndex = (variantIndex - 1 + (key == 'right' and 1 or -1)) % #variants + 1
-    local edited = copy(requested)
-    edited[part .. 'Variant'] = variants[variantIndex]
-    edited[part .. 'Probability'] = 100
-    rebuild(edited)
-  elseif key == 'up' or key == 'down' then
+  if editor:keypressed(key) then return end
+  if key == 'up' or key == 'down' then
     local seed = state.seed
     styleIndex = (styleIndex - 1 + (key == 'down' and 1 or -1)) % #styles + 1
     selectStyle(styles[styleIndex])
@@ -144,6 +132,10 @@ function love.keypressed(key)
     statusMessage = ok and ('Saved ' .. filename) or (message or 'Save failed')
     if ok then print('Saved ' .. love.filesystem.getSaveDirectory() .. '/' .. filename) end
   elseif key == 'h' then
+    if renderer == 'thorvg' then
+      local valid, err = pcall(require('love_dicebear.http').url, styleName, requested)
+      if not valid then statusMessage = 'Cannot switch to HTTP: ' .. tostring(err); return end
+    end
     renderer = renderer == 'http' and 'thorvg' or 'http'
     rebuild(requested)
   elseif key == 'c' and renderer == 'http' then
@@ -174,11 +166,19 @@ local function controls()
 end
 
 function love.mousepressed(x, y, button)
-  if button ~= 1 or not state or x < 320 or x > 728 then return end
+  if not state then return end
+  editor:mousepressed(x, y, button)
+  if editor.input ~= nil or button ~= 1 or x < 320 or x > 728 then return end
   for i, control in ipairs(controls()) do
     local top = 60 + (i - 1) * 40
     if y >= top and y <= top + 32 and control.enabled then love.keypressed(control.key); return end
   end
+end
+
+function love.textinput(text) editor:textinput(text) end
+function love.wheelmoved(_, y)
+  local _, mouseY = love.mouse.getPosition()
+  if state and mouseY >= 438 and y ~= 0 then editor:wheelmoved(y) end
 end
 
 function love.draw()
@@ -212,11 +212,13 @@ function love.draw()
   end
   love.graphics.printf(detail, 320, 266, 408)
   love.graphics.print(styleName .. ' / ' .. ((description.meta.creator or {}).name or 'Unknown'), 32, 310)
-  love.graphics.print('Up/Down: style    Left/Right: variant    R: new', 32, 338)
+  love.graphics.print('Up/Down: style    Tab: setting    Left/Right: change    R: new', 32, 338)
   local source = renderer
   if renderer == 'http' and document and document:getSource() == 'cache' then source = 'http / cached' end
   love.graphics.print('H: renderer (' .. source .. ')    S: save ' .. (renderer == 'http' and 'PNG' or 'SVG'), 32, 366)
-  love.graphics.print(statusMessage or (part and (part .. ': ' .. tostring(state[part .. 'Variant'])) or ''), 32, 394)
+  love.graphics.printf(statusMessage or ('Selected: ' .. editor.rows[editor.selected].name), 32, 394, 696)
+  editor:draw()
+  if smoke and smoke.capture then smoke:capture() end
 end
 
 function love.quit() if document then document:release() end end

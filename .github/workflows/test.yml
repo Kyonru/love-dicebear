@@ -22,6 +22,7 @@ jobs:
       - run: ${{ matrix.lua }} tests/run.lua
       - run: ${{ matrix.lua }} tests/adapter.lua
       - run: ${{ matrix.lua }} tests/save.lua
+      - run: ${{ matrix.lua }} tests/editor.lua
       - run: ${{ matrix.lua }} tests/http_url.lua
       - run: ${{ matrix.lua }} tests/http.lua
       - run: ${{ matrix.lua }} tests/http_worker.lua
@@ -39,3 +40,19 @@ jobs:
           python-version: '3.14'
       - run: sudo apt-get update && sudo apt-get install -y lua5.4
       - run: python tests/release.py
+
+  example-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y love xvfb xauth
+      - name: Exercise the editor in LÖVE
+        env:
+          LIBGL_ALWAYS_SOFTWARE: '1'
+        run: timeout 60s xvfb-run -a love . --editor-test
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: editor-previews
+          path: ~/.local/share/love/love-dicebear-demo/editor-*.png
+          if-no-files-found: ignore
