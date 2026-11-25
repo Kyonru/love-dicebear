@@ -45,3 +45,4 @@ Generated from the pinned upstream definitions. Artwork licenses are independent
 | `notionists-neutral` | Zoish | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/notionists-neutral.json) |
 | `notionists` | Zoish | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/notionists.json) |
 | `open-peeps` | Pablo Stanley | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/open-peeps.json) |
+| `patchwork` | DiceBear | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/patchwork.json) |
