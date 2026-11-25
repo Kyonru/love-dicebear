@@ -16,12 +16,14 @@ function M.describe(name)
 end
 
 function M.resolve(name, input)
-  return options.resolve(style(name), input or {})
+  if input == nil then input = {} end
+  return options.resolve(style(name), input)
 end
 
 function M.generate(name, input)
   local definition = style(name)
-  local resolved = options.resolve(definition, input or {})
+  if input == nil then input = {} end
+  local resolved = options.resolve(definition, input)
   return renderer.render(definition, resolved), resolved
 end
 

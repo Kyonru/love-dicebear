@@ -51,6 +51,7 @@ rejects({baseColor = {[2] = 'ffffff'}}); rejects({rotate = {1, 2, 3}})
 rejects({rotate = {min = 0, max = 1}}); rejects({title = '\0'})
 rejects({backgroundColorFill = 'linear'}); rejects({typo = true})
 rejects({flip = true})
+rejects(false)
 for _, name in ipairs({'eyes', 'mouth', 'head', 'sides', 'texture', 'top'}) do
   for _, variant in ipairs(dicebear.describe('bottts').options[name .. 'Variant'].values) do
     local options = {seed = 'every-variant', textureProbability = 100}
