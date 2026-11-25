@@ -47,4 +47,5 @@ Generated from the pinned upstream definitions. Artwork licenses are independent
 | `open-peeps` | Pablo Stanley | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/open-peeps.json) |
 | `patchwork` | DiceBear | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/patchwork.json) |
 | `personas` | Draftbit - draftbit.com | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/personas.json) |
+| `pixel-art-neutral` | DiceBear | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/pixel-art-neutral.json) |
 | `pixel-art` | DiceBear | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/pixel-art.json) |
