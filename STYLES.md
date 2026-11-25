@@ -22,3 +22,4 @@ Generated from the pinned upstream definitions. Artwork licenses are independent
 | `croodles-neutral` | vijay verma | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/croodles-neutral.json) |
 | `croodles` | vijay verma | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/croodles.json) |
 | `cutouts` | DiceBear | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/cutouts.json) |
+| `disco` | DiceBear | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/disco.json) |
