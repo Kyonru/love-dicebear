@@ -9,3 +9,5 @@ site/
 .cache/
 docs/styles.md
 docs/third-party.md
+dist/
+__pycache__/
