@@ -2,6 +2,7 @@
 local oldLove, oldThorvg = love, package.loaded.love_thorvg
 local files, failLoad, failWrite = {}, false, false
 local released = false
+local lastSettings
 local ok, message = pcall(function()
   love = {filesystem = {
     createDirectory = function() return true end,
@@ -13,6 +14,7 @@ local ok, message = pcall(function()
     remove = function(path) files[path] = nil; return true end,
   }}
   package.loaded.love_thorvg = {new = function(path, settings)
+    lastSettings = settings
     assert(files[path]:find('<svg', 1, true), 'adapter did not write SVG')
     assert(settings.autoplay == false and settings.width == 128)
     if failLoad then error('renderer failure') end
@@ -27,6 +29,20 @@ local ok, message = pcall(function()
   local supported, textError = pcall(adapter.new, 'initials', {seed = 'Ada'}, settings)
   assert(not supported and tostring(textError):find('SVG text', 1, true))
   assert(next(files) == nil, 'unsupported text leaked a temporary SVG')
+  local withFont = {width = 128, fonts = {['system-ui'] = 'fonts/Abel.ttf'}}
+  supported, textError = pcall(adapter.new, 'initials', {seed = 'Ada'}, withFont)
+  assert(not supported and tostring(textError):find('SVG font preloading', 1, true))
+  package.loaded.love_thorvg.capabilities = {svgFonts = true}
+  local text = adapter.new('initials', {seed = 'Ada'}, withFont)
+  assert(lastSettings.fonts['system-ui'] == 'fonts/Abel.ttf' and lastSettings.assetRoot == '')
+  assert(withFont.assetRoot == nil, 'font options mutated')
+  text:release()
+  local named = adapter.new('initial-face', {seed = 'Ada', fontFamily = 'Abel'}, {
+    width = 128, fonts = {Abel = 'Abel.ttf'}, assetRoot = 'fonts/',
+  })
+  assert(lastSettings.assetRoot == 'fonts/' and lastSettings.fonts.Abel == 'Abel.ttf')
+  named:release()
+  assert(next(files) == nil, 'text render leaked SVG')
   failLoad = true
   local success, err = pcall(adapter.new, 'bottts', {}, settings)
   assert(not success and tostring(err):find('renderer failure', 1, true))

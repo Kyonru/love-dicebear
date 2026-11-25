@@ -8,9 +8,18 @@ local counter = 0
 function M.new(style, options, renderOptions)
   assert(love and love.filesystem, 'love_dicebear.thorvg requires LÖVE')
   local svg, resolved = dicebear.generate(style, options)
-  assert(not svg:find('<text[%s>]'),
-    'love-thorvg v0.2.0 does not reliably render SVG text; use dicebear.generate() and another renderer for this avatar')
+  local settings = util.copy(renderOptions or {})
+  if svg:find('<text[%s>]') then
+    assert(type(settings.fonts) == 'table' and settings.fonts[resolved.fontFamily],
+      'SVG text requires a font mapping for ' .. resolved.fontFamily .. ' in renderOptions.fonts')
+  end
   local thorvg = require('love_thorvg')
+  if svg:find('<text[%s>]') then
+    assert(thorvg.capabilities and thorvg.capabilities.svgFonts,
+      'SVG text requires a love-thorvg build with SVG font preloading; update its Lua wrapper and native library')
+  end
+  -- Staged SVGs are temporary; user font paths are relative to the game root.
+  if settings.assetRoot == nil then settings.assetRoot = '' end
   local directory = 'love-dicebear-temp'
   assert(love.filesystem.createDirectory(directory), 'could not create SVG staging directory')
   local path
@@ -20,7 +29,6 @@ function M.new(style, options, renderOptions)
   until not love.filesystem.getInfo(path)
   local written, message = love.filesystem.write(path, svg)
   assert(written, message or 'could not stage SVG')
-  local settings = util.copy(renderOptions or {})
   settings.autoplay = false
   local success, document = pcall(thorvg.new, path, settings)
   local removed = love.filesystem.remove(path)
