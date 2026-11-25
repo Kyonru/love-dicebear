@@ -27,13 +27,53 @@ love-thorvg currently takes a path, loads it synchronously, then removes the
 temporary file even if loading fails. It therefore needs a writable save
 directory. Rendering requires LÖVE; the core generator does not.
 
-**SVG text is a known limitation of the tested love-thorvg v0.2.0 build.**
-`initials` and `initial-face` generate correct SVGs but cannot be fully previewed
-with that backend. The adapter rejects SVG text instead of returning a blank or
-incomplete avatar. The example displays a notice for those two styles and still
-lets you save their SVGs or switch to the HTTP PNG backend with H. Embedding a font did not resolve
-the limitation in the tested build. Other renderer differences in filters,
-blending, or masking are not covered by byte-level generator parity.
+## SVG text and fonts
+
+`initials` and `initial-face` can render locally when you supply a font and use
+an SVG-font-capable love-thorvg build. The published v0.2.0 binary does not
+preload SVG fonts; update both its Lua wrapper and native library.
+The upstream implementation is tracked in [love-thorvg PR #1](https://github.com/Kyonru/love-thorvg/pull/1). The adapter
+checks `thorvg.capabilities.svgFonts` and reports missing support explicitly.
+
+```lua
+local document, settings = avatars.new('initials', {
+  seed = 'Ada Lovelace',
+  fontFamily = 'Abel',
+}, {
+  width = 256, height = 256,
+  fonts = {Abel = 'fonts/Abel-Regular.ttf'},
+})
+```
+
+The `fonts` key must match the resolved `fontFamily` exactly. To keep the default
+family, map `['system-ui']` to your font file instead. A family name alone does
+not load an operating-system font. Font paths are relative to the game root
+unless you explicitly set `assetRoot` (include its trailing slash). Missing or
+invalid supplied fonts raise an error; no font is downloaded automatically.
+
+Use an appropriately licensed TTF or OTF font and distribute its notice.
+The repository includes Abel Regular under the SIL Open Font License for the
+example and tests; it is excluded from library release ZIPs.
+
+With the updated renderer installed:
+
+```sh
+npm run dev -- --style initials --font examples/fonts/Abel-Regular.ttf
+npm run dev -- --style initial-face --font examples/fonts/Abel-Regular.ttf
+love . --font-test
+```
+
+The launcher still pins the published v0.2.0 release, so install the updated
+renderer manually first; an existing installation is preserved. Without a
+font, the example offers SVG export or an HTTP preview. The experimental web
+backend does not yet support SVG font preloading.
+
+Font data is shared across live documents using the same family. That family
+must refer to identical bytes until all its documents are released. Supply the
+actual font face you need; browser-like fallback and automatic weight/style
+matching are not provided. These tests verify visible text and lifecycle;
+other renderer differences in filters, blending, or masking remain outside
+byte-level SVG generator parity.
 
 Keep the returned document between frames. When an editor changes settings,
 create the replacement document, then release the old one. Do not generate or

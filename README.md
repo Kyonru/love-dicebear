@@ -60,10 +60,11 @@ See [customization](https://kyonru.github.io/love-dicebear/customization/) and t
 | [love-thorvg](https://kyonru.github.io/love-dicebear/thorvg/) | Local SVG previews in LÖVE using the native renderer |
 | [HTTP adapter](https://kyonru.github.io/love-dicebear/http/) | API-rendered PNGs, ordinary LÖVE Images, saving, and optional disk caching |
 
-SVG generation is independent of rendering. The tested love-thorvg build does
-not support SVG text in `initials` and `initial-face`; the HTTP adapter can
-preview those styles. HTTP rendering requires desktop LÖVE, `curl`, and access
-to the configured API, unless a fresh cached image is available.
+SVG generation is independent of rendering. Local previews of `initials` and
+`initial-face` require an explicitly supplied font and a love-thorvg build with
+SVG font preloading (not the published v0.2.0 binary). See the ThorVG guide above.
+HTTP rendering requires desktop LÖVE, `curl`, and access to the configured API,
+unless a fresh cached image is available.
 
 ## Try the example
 

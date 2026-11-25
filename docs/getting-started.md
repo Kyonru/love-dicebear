@@ -24,6 +24,16 @@ npm run dev -- --style lorelei  # start with a specific style
 LOVE=/path/to/love npm run dev  # select a LÖVE executable (macOS/Linux)
 ```
 
+To preview the text styles locally with an SVG-font-capable renderer:
+
+```sh
+npm run dev -- --style initials --font examples/fonts/Abel-Regular.ttf
+```
+
+This requires an updated love-thorvg wrapper and native library; the launcher's
+pinned v0.2.0 download does not support SVG font preloading. See
+[local text rendering](thorvg.md#svg-text-and-fonts) for installation and font options.
+
 To use API-rendered PNGs, including the text-based styles, run:
 
 ```sh

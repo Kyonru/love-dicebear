@@ -80,7 +80,8 @@ npm test
 npm run test:dev
 love . --test
 love . --render-test  # requires love_thorvg/
-love . --catalog-render-test  # 61 native previews + 2 documented text limitations
+love . --catalog-render-test  # all 63 with SVG font support; otherwise 61
+love . --font-test  # text pixels, shared ownership, and missing-font errors
 love . --http-test  # opt-in live API download, draw, save, and disk-cache test
 ```
 
@@ -91,8 +92,8 @@ Set `LUA=luajit` to run the parity suite with another Lua executable, or
 
 The parity suite covers all 63 styles and 2,985 variant selections, Unicode seeds, weights, visibility,
 palette filtering, XML escaping, and transforms. The native smoke suite checks
-all 53 Bottts variants; the catalog smoke suite checks 61 styles without
-backgrounds, then resizes and releases each document. It also generates a
+all 53 Bottts variants; the catalog smoke suite checks all 63 styles with an
+SVG-font-capable renderer (61 otherwise), then resizes and releases each document. It also generates a
 `catalog-smoke.png` contact sheet in the LÖVE save directory. These are not
 pixel-by-pixel comparisons with another SVG renderer. All 7,096 parity cases
 have also passed inside LÖVE/LuaJIT. To test one style, run `npm test -- lorelei`.
