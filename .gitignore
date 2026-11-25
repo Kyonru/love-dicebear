@@ -4,3 +4,8 @@ test-output/
 love_thorvg/
 .dev/
 *.love
+.venv-docs/
+site/
+.cache/
+docs/styles.md
+docs/third-party.md
