@@ -32,3 +32,4 @@ Generated from the pinned upstream definitions. Artwork licenses are independent
 | `icons` | The Bootstrap Authors | [MIT](https://github.com/twbs/icons/blob/main/LICENSE) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/icons.json) |
 | `identicon` | DiceBear | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/identicon.json) |
 | `initial-face` | DiceBear | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/initial-face.json) |
+| `initials` | DiceBear | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | [source](https://github.com/dicebear/styles/blob/b19a973b7ff86e2ac49277e371c2d0fdcac49faa/src/initials.json) |
