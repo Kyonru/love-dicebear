@@ -143,9 +143,8 @@ function Editor:keypressed(key)
     end
     return true -- Typed letters must not trigger Save, Randomize, or renderer shortcuts.
   end
-  if key == 'tab' then
-    local backwards = love and love.keyboard and love.keyboard.isDown('lshift', 'rshift')
-    self:select(self.selected + (backwards and -1 or 1))
+  if key == 'up' or key == 'down' then
+    self:select(self.selected + (key == 'up' and -1 or 1))
   elseif key == 'pageup' or key == 'pagedown' then self:select(self.selected + (key == 'pageup' and -visibleRows or visibleRows))
   elseif key == 'left' or key == 'right' then self:adjust(key == 'right' and 1 or -1)
   elseif key == 'e' then self:beginInput(); self.ignoreOpeningText = self.input ~= nil
@@ -215,7 +214,7 @@ function Editor:draw()
     end
   end
   g.setColor(1, 1, 1)
-  local hint = self.input ~= nil and 'Type a value • Enter: apply • Esc: cancel' or 'Tab / Shift+Tab: select • Left/Right: change • E: type • Backspace: reset'
+  local hint = self.input ~= nil and 'Type a value • Enter: apply • Esc: cancel' or 'Up/Down: select • Left/Right: change • E: type • Backspace: reset'
   g.print(hint, 32, 738)
   if self.message then
     g.setColor(1, 0.72, 0.55)

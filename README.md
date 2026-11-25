@@ -88,7 +88,12 @@ reduced-motion preferences by default. In native LÖVE, the application controls
 reduced motion by disabling animation. HTTP PNG previews remain static.
 See the [animation guide](https://kyonru.github.io/love-dicebear/thorvg/#animation).
 
-Try an animated cat with `npm run dev -- --style cats --animate`.
+Run `npm run dev` (or `love .` after setup) to start with an animated cat.
+Press **A** or click **Animation** to toggle motion; the setting stays selected
+when switching styles with Tab / Shift+Tab or generating a new avatar with R.
+Use `love . --no-animate` to start with motion off. Only styles and variants with
+timelines animate; HTTP PNG previews remain static. Text styles automatically
+use the bundled Abel font; pass `--font path/to/font.ttf` to use another font.
 
 ## Try the example
 

@@ -57,7 +57,7 @@ a selectable row: variants and enums cycle through choices, colors cycle through
 palettes or accept a typed hex value, and numeric options use bounded steps or
 exact input. The panel also supports seed, title, and font text fields.
 
-Use Tab to select a setting, Left/Right to change it, and E to type. Enter applies
+Use Up/Down to select a setting, Left/Right to change it, and E to type. Enter applies
 typed input; Escape cancels it. Backspace outside text input removes that option's
 explicit override. See [all example controls](getting-started.md#example-controls).
 

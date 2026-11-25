@@ -68,14 +68,15 @@ example and tests; it is excluded from library release ZIPs.
 With the updated renderer installed:
 
 ```sh
-npm run dev -- --style initials --font examples/fonts/Abel-Regular.ttf
-npm run dev -- --style initial-face --font examples/fonts/Abel-Regular.ttf
+npm run dev -- --style initials
+npm run dev -- --style initial-face
 love . --font-test
 ```
 
 The launcher pins v0.3.0. Existing manual installations are preserved; replace
-an older `love_thorvg/` directory with the complete v0.3.0 package to upgrade. Without a
-font, the example offers SVG export or an HTTP preview. The experimental web
+an older `love_thorvg/` directory with the complete v0.3.0 package to upgrade. The
+example automatically loads the bundled Abel font. Override it with
+`--font path/to/font.ttf` (relative to the game directory). The experimental web
 backend does not yet support SVG font preloading.
 
 Font data is shared across live documents using the same family. That family
@@ -91,9 +92,11 @@ Keep the returned document between frames. When an editor changes settings,
 create the replacement document, then release the old one. Do not generate or
 rasterize the avatar every `love.draw` call.
 
-Run `npm run dev` (or `love .` after setup) for the catalog example: Up/Down changes
-style, Tab selects an avatar setting and Left/Right changes it, and R generates a new
-avatar. Saved files are written to LÖVE's save directory; the full path is
+Run `npm run dev` (or `love .` after setup) for the catalog example: Tab / Shift+Tab changes
+style, Up/Down selects an avatar setting and Left/Right changes it, and R generates a new
+avatar. Animation is on by default; press A or click Animation to toggle it.
+The setting persists across styles and new seeds. Use `love . --no-animate` to
+start with motion off. Saved files are written to LÖVE's save directory; the full path is
 printed to the console.
 
 ## Animation

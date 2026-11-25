@@ -1,12 +1,13 @@
 -- Catalog example: local ThorVG or optional HTTP PNG rendering.
 local dicebear = require('love_dicebear')
 local document, state
-local styleName, styleIndex = 'bottts', 1
+local styleName, styleIndex = 'cats', 1
+local animationEnabled = true
 local styles = dicebear.styles()
 local previewNotice
 local description = dicebear.describe(styleName)
 local renderer = 'thorvg'
-local fontPath
+local fontPath = 'examples/fonts/Abel-Regular.ttf'
 local requested, pending, statusMessage, smoke
 local cacheEnabled, forceRefresh = false, false
 local lifetimes = {{label = '5 minutes', seconds = 300}, {label = '1 hour', seconds = 3600}, {label = '24 hours', seconds = 86400}}
@@ -21,12 +22,24 @@ local function selectStyle(name)
   editor:setDescription(description)
 end
 
+-- HTTP PNGs have no timelines; keep local animation preferences when switching back.
+local function httpOptions(options)
+  local result = copy(options)
+  for name in pairs(result) do
+    if name:match('^animation') or name:find('Animation', 1, true) then result[name] = nil end
+  end
+  return result
+end
+
 local function rebuild(options)
+  options = copy(options)
+  if options.animation ~= nil then animationEnabled = options.animation end
+  options.animation = animationEnabled
   local nextDocument, nextState
   requested, pending, statusMessage, forceRefresh = copy(options), nil, nil, false
   previewNotice = renderer == 'thorvg' and not fontPath and require('love_dicebear.thorvg_support')[styleName] or nil
   if renderer == 'http' then
-    nextState = dicebear.resolve(styleName, options)
+    nextState = dicebear.resolve(styleName, httpOptions(options))
     pending, previewNotice = 0.2, 'Downloading PNG…'
   elseif previewNotice then
     nextState = dicebear.resolve(styleName, options)
@@ -75,22 +88,21 @@ function love.load(args)
     love.event.quit(ok and 0 or 1)
     return
   end
-  local animate
   for i, arg in ipairs(args) do
     if arg == '--style' then styleName = assert(args[i + 1], '--style requires a name') end
     if arg == '--renderer' then
       renderer = args[i + 1]
       assert(renderer == 'thorvg' or renderer == 'http', '--renderer must be thorvg or http')
     end
-    if arg == '--animate' then animate = true end
+    if arg == '--animate' then animationEnabled = true end
+    if arg == '--no-animate' then animationEnabled = false end
     if arg == '--cache' then cacheEnabled = true end
     if arg == '--font' then fontPath = assert(args[i + 1], '--font requires a path inside the game') end
   end
   if args[1] == '--editor-test' then styleName, renderer = 'initials', 'thorvg' end
   selectStyle(styleName)
   love.window.setTitle('love-dicebear / Style catalog')
-  assert(not animate or renderer == 'thorvg', '--animate requires the local ThorVG renderer')
-  rebuild({seed = 'hello-love', backgroundColor = 'e8edf2', borderRadius = 12, animation = animate})
+  rebuild({seed = 'hello-love', backgroundColor = 'e8edf2', borderRadius = 12})
   if args[1] == '--editor-test' then smoke = require('tests.editor_render').new(editor) end
 end
 
@@ -104,7 +116,7 @@ function love.update(dt)
     pending = pending - dt
     if pending <= 0 then
       pending = nil
-      local ok, result = pcall(require('love_dicebear.http').new, styleName, requested, {
+      local ok, result = pcall(require('love_dicebear.http').new, styleName, httpOptions(requested), {
         cache = cacheEnabled and {ttl = lifetimes[lifetimeIndex].seconds} or false, refresh = forceRefresh,
       })
       if ok then document = result
@@ -123,11 +135,20 @@ end
 function love.keypressed(key)
   if not state then return end
   if editor:keypressed(key) then return end
-  if key == 'up' or key == 'down' then
+  if key == 'tab' then
+    local backwards = love.keyboard.isDown('lshift', 'rshift')
     local seed = state.seed
-    styleIndex = (styleIndex - 1 + (key == 'down' and 1 or -1)) % #styles + 1
+    styleIndex = (styleIndex - 1 + (backwards and -1 or 1)) % #styles + 1
     selectStyle(styles[styleIndex])
     rebuild({seed = seed, borderRadius = 12})
+  elseif key == 'a' and renderer == 'thorvg' then
+    local options = copy(requested)
+    options.animation = not animationEnabled
+    -- A is the all-animations switch; reset per-timeline overrides to inherit it.
+    for name in pairs(options) do
+      if name:match('Animation$') then options[name] = nil end
+    end
+    rebuild(options)
   elseif key == 'r' then
     rebuild({seed = tostring(love.timer.getTime()), backgroundColor = 'e8edf2', borderRadius = 12})
   elseif key == 's' then
@@ -145,7 +166,7 @@ function love.keypressed(key)
     if ok then print('Saved ' .. love.filesystem.getSaveDirectory() .. '/' .. filename) end
   elseif key == 'h' then
     if renderer == 'thorvg' then
-      local valid, err = pcall(require('love_dicebear.http').url, styleName, requested)
+      local valid, err = pcall(require('love_dicebear.http').url, styleName, httpOptions(requested))
       if not valid then statusMessage = 'Cannot switch to HTTP: ' .. tostring(err); return end
     end
     renderer = renderer == 'http' and 'thorvg' or 'http'
@@ -169,6 +190,7 @@ end
 local function controls()
   local remote = renderer == 'http'
   return {
+    {key = 'a', label = 'A  Animation: ' .. (remote and 'Unavailable (PNG)' or (animationEnabled and 'On' or 'Off')), enabled = not remote},
     {key = 'h', label = 'H  Renderer: ' .. (remote and 'HTTP PNG' or 'Local SVG'), enabled = true},
     {key = 'c', label = 'C  Disk cache: ' .. (cacheEnabled and 'On' or 'Off'), enabled = remote},
     {key = 't', label = 'T  Cache lifetime: ' .. lifetimes[lifetimeIndex].label, enabled = remote and cacheEnabled},
@@ -182,8 +204,8 @@ function love.mousepressed(x, y, button)
   editor:mousepressed(x, y, button)
   if editor.input ~= nil or button ~= 1 or x < 320 or x > 728 then return end
   for i, control in ipairs(controls()) do
-    local top = 60 + (i - 1) * 40
-    if y >= top and y <= top + 32 and control.enabled then love.keypressed(control.key); return end
+    local top = 60 + (i - 1) * 34
+    if y >= top and y <= top + 28 and control.enabled then love.keypressed(control.key); return end
   end
 end
 
@@ -207,13 +229,13 @@ function love.draw()
   love.graphics.print('Rendering options', 320, 32)
   local mx, my = love.mouse.getPosition()
   for i, control in ipairs(controls()) do
-    local top = 60 + (i - 1) * 40
-    local hover = control.enabled and mx >= 320 and mx <= 728 and my >= top and my <= top + 32
+    local top = 60 + (i - 1) * 34
+    local hover = control.enabled and mx >= 320 and mx <= 728 and my >= top and my <= top + 28
     love.graphics.setColor(hover and 0.25 or 0.16, hover and 0.29 or 0.18, hover and 0.34 or 0.22)
-    love.graphics.rectangle('fill', 320, top, 408, 32, 4, 4)
+    love.graphics.rectangle('fill', 320, top, 408, 28, 4, 4)
     local shade = control.enabled and 1 or 0.55
     love.graphics.setColor(shade, shade, shade)
-    love.graphics.print(control.label, 332, top + 8)
+    love.graphics.print(control.label, 332, top + 6)
   end
   love.graphics.setColor(1, 1, 1)
   local detail = 'Local generation. Switch to HTTP for cache options.'
@@ -224,7 +246,7 @@ function love.draw()
   end
   love.graphics.printf(detail, 320, 266, 408)
   love.graphics.print(styleName .. ' / ' .. ((description.meta.creator or {}).name or 'Unknown'), 32, 310)
-  love.graphics.print('Up/Down: style    Tab: setting    Left/Right: change    R: new', 32, 338)
+  love.graphics.print('Tab/Shift+Tab: style    Up/Down: setting    Left/Right: change    R: new', 32, 338)
   local source = renderer
   if renderer == 'http' and document and document:getSource() == 'cache' then source = 'http / cached' end
   love.graphics.print('H: renderer (' .. source .. ')    S: save ' .. (renderer == 'http' and 'PNG' or 'SVG'), 32, 366)

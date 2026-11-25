@@ -21,6 +21,9 @@ local function typeValue(value)
 end
 setup('bottts')
 assert(editor.rows[1].name == 'eyesVariant')
+assert(editor:keypressed('down') and editor.selected == 2)
+assert(editor:keypressed('up') and editor.selected == 1)
+assert(not editor:keypressed('tab'), 'editor consumed the style shortcut')
 local eyes = state.eyesVariant
 select('mouthVariant'); editor:adjust(1)
 assert(input.mouthVariant and input.mouthProbability == 100 and state.eyesVariant == eyes)

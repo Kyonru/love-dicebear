@@ -81,23 +81,28 @@ npm run dev -- --renderer http --style initials --cache
 ```
 
 HTTP mode skips ThorVG installation and requires `curl`. With an updated
-SVG-font-capable renderer already installed, try a supplied local font:
+SVG-font-capable renderer already installed, text styles automatically use the
+bundled Abel font:
 
 ```sh
-npm run dev -- --style initials --font examples/fonts/Abel-Regular.ttf
+npm run dev -- --style initials
 ```
 
+Use `--font path/to/font.ttf` to supply a different font.
 The launcher's pinned v0.3.0 download supports SVG font preloading. See the
 [ThorVG guide](thorvg.md) for the updated build requirement.
 
 ### Example controls
 
+The example starts with an animated cat. Animation stays enabled when switching
+styles or generating a new avatar. Use `love . --no-animate` to start with it off.
+Only styles and variants with timelines animate; HTTP PNG previews are static.
 Rendering and cache actions are also clickable in the example's side panel.
 
 | Key | Action |
 | --- | --- |
-| Up / Down | Change style |
-| Tab / Shift+Tab | Select the next / previous avatar setting |
+| Tab / Shift+Tab | Next / previous style |
+| Up / Down | Select the previous / next avatar setting |
 | Left / Right | Cycle choices or increase / decrease the selected value |
 | E | Type an exact value (hex color, seed, number, or variant name) |
 | Enter / Escape while typing | Apply / cancel the edit |
@@ -105,6 +110,7 @@ Rendering and cache actions are also clickable in the example's side panel.
 | Page Up / Page Down | Move through settings by a page |
 | Mouse wheel over settings | Move through the settings list |
 | R | Generate a new seeded avatar |
+| A | Toggle all local animations on/off (resets individual animation switches) |
 | H | Switch between local SVG and HTTP PNG rendering |
 | S | Save `avatar.svg` or `avatar.png` to LÖVE's save directory |
 | C | Toggle HTTP disk caching |
@@ -125,7 +131,8 @@ Invalid values keep the current avatar and show an error beside the editor.
 HTTP mode marks alias overrides, title, and font settings as local-only and
 limits size to 256. If existing local options cannot be represented by the API,
 switching to HTTP reports the incompatible setting; reset it first. Font-family
-changes use the font supplied with `--font`; they do not select a different file.
+changes use the bundled Abel font (or your `--font` override); they do not select
+a different file.
 
 Caching is off by default; `--cache` enables a 24-hour lifetime. The panel shows
 whether the image came from the network or disk. Switching to local rendering
