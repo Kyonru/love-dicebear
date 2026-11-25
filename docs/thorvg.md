@@ -5,6 +5,7 @@ icon: lucide/image
 
 Use ThorVG to preview locally generated SVGs without a server. For constructor
 settings and Document methods, see the [adapter API](api/thorvg.md).
+This adapter is optional: you can also [bring your own renderer](renderers.md).
 
 ## Install the renderer
 

@@ -8,6 +8,8 @@ local dicebear = require('love_dicebear')
 ```
 
 The core runs in Lua 5.1+ and LÖVE without a renderer or network connection.
+Pass the generated SVG to [your own renderer](../renderers.md) without importing
+either optional adapter.
 Functions do not mutate your input tables or change `math.random` state.
 
 | Member | Returns | Purpose |

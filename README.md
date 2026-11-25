@@ -2,8 +2,9 @@
 
 Customizable [DiceBear](https://www.dicebear.com/) avatars for Lua and
 [LÖVE](https://love2d.org/). Generate deterministic SVGs locally, render them
-with [love-thorvg](https://github.com/Kyonru/love-thorvg), or download PNGs
-through the optional HTTP adapter.
+with your choice of SVG renderer, or download PNGs through the optional HTTP
+adapter. [love-thorvg](https://github.com/Kyonru/love-thorvg) is an optional
+integration, never a requirement for generation.
 
 **[Documentation](https://kyonru.github.io/love-dicebear/)** ·
 [Style catalog](STYLES.md) · [Contributing](contribute.md)
@@ -57,6 +58,7 @@ See [customization](https://kyonru.github.io/love-dicebear/customization/) and t
 
 | Renderer | Use it for |
 | --- | --- |
+| [Bring your own renderer](https://kyonru.github.io/love-dicebear/renderers/) | Pass generated SVG to your preferred renderer; no adapter registration needed |
 | [love-thorvg](https://kyonru.github.io/love-dicebear/thorvg/) | Local SVG previews in LÖVE using the native renderer |
 | [HTTP adapter](https://kyonru.github.io/love-dicebear/http/) | API-rendered PNGs, ordinary LÖVE Images, saving, and optional disk caching |
 
@@ -75,7 +77,7 @@ npm run dev
 ```
 
 The launcher installs love-thorvg and opens the avatar browser. Browse styles,
-change variants, and save SVGs, or switch to HTTP rendering for PNGs and cache
+edit avatar settings, and save SVGs, or switch to HTTP rendering for PNGs and cache
 controls. See [getting started](https://kyonru.github.io/love-dicebear/getting-started/)
 for setup and controls.
 

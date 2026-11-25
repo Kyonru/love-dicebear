@@ -9,7 +9,7 @@ Pixel Art, and Initials. See [STYLES.md](styles.md) for the full list and licens
 The local generator needs no HTTP requests, Node runtime, native generator,
 or JSON parser in your game.
 
-SVG generation and rendering are separate. Use any SVG renderer, or the optional
+SVG generation and rendering are separate. Use [your own SVG renderer](renderers.md), or the optional
 adapter for [love-thorvg](https://github.com/Kyonru/love-thorvg). An optional
 HTTP backend downloads PNGs from DiceBear and displays ordinary LÖVE Images.
 
@@ -25,10 +25,11 @@ HTTP backend downloads PNGs from DiceBear and displays ordinary LÖVE Images.
 | Path | Output | Requirements | Works offline |
 | --- | --- | --- | --- |
 | Core generator | SVG string | Lua 5.1+ or LÖVE | Yes |
+| [Bring your own renderer](renderers.md) | Your renderer’s output | Your chosen SVG library | Depends on your renderer |
 | [love-thorvg](thorvg.md) | Drawable SVG document | LÖVE and native love-thorvg | Yes |
 | [HTTP adapter](http.md) | LÖVE Image and PNG | Desktop LÖVE, curl, API access | With a fresh cached PNG |
 
-The generator is independent of either renderer. Use local generation for fully
+The generator is independent of all rendering integrations. Use local generation for fully
 local avatars, or the HTTP adapter when you want server-rendered PNGs.
 
 See [development](development.md) for tests and [documentation maintenance](documentation.md)

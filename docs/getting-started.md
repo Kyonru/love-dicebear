@@ -53,11 +53,13 @@ Continue with [building an editor](customization.md) or the [core API](api/core.
 
 | Renderer | Setup | Output |
 | --- | --- | --- |
+| [Bring your own renderer](renderers.md) | Use your preferred SVG library | Whatever your renderer produces |
 | [Local ThorVG](thorvg.md) | Install love-thorvg separately | Drawable document, entirely local |
 | [HTTP adapter](http.md) | Desktop LÖVE and system `curl` | Downloaded PNG and ordinary LÖVE Image |
 
-The core generator works independently of both. Local text styles require a
-supplied font and SVG-font-capable ThorVG build; see [font setup](thorvg.md#svg-text-and-fonts).
+The core generator works independently of all renderers. No renderer registration
+or ThorVG-compatible interface is required. When using ThorVG, local text styles
+require a supplied font and SVG-font-capable build; see [font setup](thorvg.md#svg-text-and-fonts).
 
 ## Try the catalog example
 

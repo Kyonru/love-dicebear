@@ -1,6 +1,6 @@
 [project]
 site_name = "love-dicebear"
-site_description = "Customizable DiceBear avatars for Lua and LÖVE: local SVG generation, ThorVG rendering, and HTTP PNGs."
+site_description = "Customizable DiceBear avatars for Lua and LÖVE: local SVG generation, your choice of renderer, and HTTP PNGs."
 site_url = "https://kyonru.github.io/love-dicebear/"
 repo_url = "https://github.com/Kyonru/love-dicebear"
 repo_name = "Kyonru/love-dicebear"
@@ -14,7 +14,8 @@ nav = [
   { "Guides" = [
     { "Getting started" = "getting-started.md" },
     { "Build an editor" = "customization.md" },
-    { "Local SVG rendering" = "thorvg.md" },
+    { "Bring your own renderer" = "renderers.md" },
+    { "Render with ThorVG" = "thorvg.md" },
     { "HTTP and caching" = "http.md" },
   ] },
   { "API reference" = [
