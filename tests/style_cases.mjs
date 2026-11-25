@@ -21,7 +21,7 @@ export default function casesForStyle(definition) {
     {seed:'transform', flip:'both', rotate:32.12345, scale:0.75, translateX:12.5, translateY:-8, borderRadius:25, backgroundColor:'ffffff'},
     {seed:'ranges', rotate:[-19,21], scale:[0.3,1.5], translateX:[20,-20], borderRadius:[8,20]},
     {seed:'title', title:'<Avatar & "friend">', size:256},
-    {seed:'Ada Lovelace', fontFamily:'Example & "Font"', fontWeight:700},
+    {seed:'Ada Lovelace', fontFamily:'Arial, sans-serif', fontWeight:700},
   );
   for (let i=0;i<20;i++) cases.push({seed:`generated-${i}`});
   return cases;
