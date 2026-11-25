@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-PIN = 'b19a973b7ff86e2ac49277e371c2d0fdcac49faa'
+PIN = (ROOT / 'vendor/dicebear-styles.commit').read_text().strip()
 
 
 def lua(value, key=None):

@@ -9,7 +9,7 @@ integration, never a requirement for generation.
 **[Documentation](https://kyonru.github.io/love-dicebear/)** ·
 [Style catalog](STYLES.md) · [Contributing](contribute.md)
 
-- **63 bundled styles**, including Adventurer, Avataaars, Bottts, Lorelei,
+- **Bundled DiceBear styles**, including Adventurer, Avataaars, Bottts, Lorelei,
   Micah, Notionists, Open Peeps, Pixel Art, and Initials.
 - **Local generation** in pure Lua, with no network or Node.js runtime required.
 - **Customizable avatars** with variants, colors, visibility, and transforms.

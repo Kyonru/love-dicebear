@@ -31,7 +31,7 @@ local saved = {version = dicebear.version, style = 'bottts', settings = settings
 
 ## `styles()`
 
-Returns a fresh array of all 63 supported names. Each call returns an independent
+Returns a fresh array of all supported names. Each call returns an independent
 copy; changing this array does not change the library. Styles load lazily.
 
 ```lua

@@ -161,7 +161,8 @@ portable archive, because the Lua library does not bundle native dependencies.
 The tag must match the Lua version exactly (with a leading `v`). Prerelease tags
 such as `v1.1.0-rc.1` produce GitHub prereleases. Creating the tag publishes a
 release automatically after the full Lua/parity suite and packaging tests pass.
-No release is created by an ordinary branch push.
+No release is created by an ordinary branch push. Merged catalog update PRs
+also publish releases as described below.
 
 The packager writes `dist/love-dicebear-<version>.zip` and `dist/SHA256SUMS`.
 The ZIP includes the Lua entry point, all runtime Lua modules and styles,
@@ -175,6 +176,48 @@ checksum before uploading it to GitHub Releases with generated release notes.
 Only the publishing job has repository write permissions. Existing releases
 are not overwritten; investigate a failed publication before retrying it.
 Do not move a published tag to different code.
+
+## Automated catalog updates
+
+The **Update DiceBear catalog** workflow checks `dicebear/styles` main monthly on the first day at
+09:23 UTC and can also be run from the Actions tab. It compares the upstream
+`src/*.json` files with `vendor/`. Unchanged artwork does not create a PR or bump
+the version, even if unrelated upstream commits have landed.
+
+When definitions change, the bot opens or refreshes one PR on
+`automation/dicebear-catalog`, labeled `update` and `minor`. It copies the original
+JSON bytes, records the upstream SHA in `vendor/dicebear-styles.commit`, regenerates
+Lua modules and `STYLES.md`, updates attribution links, removes deleted styles,
+and bumps the library version to the next minor (for example, `1.2.3` → `1.3.0`).
+DiceBear Core remains pinned separately; this automation updates artwork only.
+
+Enable **Settings → Actions → General → Workflow permissions → Allow GitHub
+Actions to create and approve pull requests**. The workflow uses `GITHUB_TOKEN`;
+no personal token or additional secret is needed. The workflow must be merged
+into `main` before its schedule and manual dispatch are available.
+
+Bot-created PR events do not trigger other workflows with `GITHUB_TOKEN`, so the
+bot explicitly dispatches **Test** and **Documentation** on its branch. Check those
+runs before merging; the bot never merges automatically. Review license changes,
+removed styles, and parity failures. A new upstream feature may require manual
+Lua support before the update can pass. Require the test checks in branch
+protection if merges must be prevented when validation fails.
+
+Merging this branch into `main` with both labels runs the complete release test
+suite on the merge commit, packages the library, creates its matching `vX.Y.0`
+tag, and publishes the GitHub release and checksum. Tag creation and publishing
+happen in the same workflow because bot-created tags do not trigger another
+workflow. Existing releases and tags are never overwritten. If a release fails,
+inspect the run and rerun failed jobs; if a tag already exists it must point to
+the same merge commit. Manual tag releases continue to work as before.
+
+To reproduce an update locally, check out `dicebear/styles` separately and run:
+
+```sh
+python3 scripts/update_catalog.py --upstream /path/to/dicebear-styles
+python3 tests/catalog_update.py
+npm test
+```
 
 ## Submit changes
 
