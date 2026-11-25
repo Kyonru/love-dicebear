@@ -1,0 +1,7 @@
+{
+  "name": "love-dicebear-dev",
+  "private": true,
+  "description": "Development-only DiceBear reference for Lua parity tests",
+  "scripts": {"test": "node tests/parity.mjs"},
+  "devDependencies": {"@dicebear/core": "10.7.0"}
+}
