@@ -61,4 +61,5 @@ for _, name in ipairs({'eyes', 'mouth', 'head', 'sides', 'texture', 'top'}) do
   end
 end
 print('PASS: ' .. count .. ' Lua assertions')
+require('tests.core')
 return count

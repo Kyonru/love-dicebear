@@ -1,10 +1,13 @@
 local util = require('love_dicebear.util')
 local prng = require('love_dicebear.prng')
+local colors = require('love_dicebear.colors')
 local M = {}
 
 local core = {
   seed = {type = 'string', default = ''},
   title = {type = 'string'},
+  fontFamily = {type = 'string', default = 'system-ui'},
+  fontWeight = {type = 'number', min = 1, max = 1000, default = 400},
   size = {type = 'number', min = 1, max = 8192},
   flip = {type = 'enum', values = {'none', 'horizontal', 'vertical', 'both'}, default = 'none'},
   rotate = {type = 'range', min = -360, max = 360, default = 0},
@@ -16,16 +19,19 @@ local core = {
 
 function M.describe(style)
   local result = util.copy(core)
-  for name, component in pairs(style.components) do
+  for name, entry in pairs(style.components or {}) do
+    local component = entry.extends and style.components[entry.extends] or entry
     local tags = {}
     for variant, data in pairs(component.variants) do tags[variant] = util.copy(data.tags or {}) end
-    result[name .. 'Variant'] = {type = 'variant', values = util.keys(component.variants), tags = tags}
+    result[name .. 'Variant'] = {type = 'variant', values = util.keys(component.variants), tags = tags, extends = entry.extends}
     result[name .. 'Probability'] = {type = 'number', min = 0, max = 100,
       default = component.probability or 100}
   end
-  for _, name in ipairs({'base', 'background'}) do
+  local groups = {background = true}
+  for name in pairs(style.colors or {}) do groups[name] = true end
+  for name in pairs(groups) do
     result[name .. 'Color'] = {type = 'color', palette = util.copy(
-      style.colors[name] and style.colors[name].values or {})}
+      (style.colors or {})[name] and style.colors[name].values or {})}
   end
   return result
 end
@@ -96,7 +102,7 @@ function M.resolve(style, input)
       if spec.type == 'string' then
         if type(value) ~= 'string' then fail(key, 'expected a string') end
         -- XML 1.0 excludes these control characters, even in escaped text.
-        if key == 'title' and value:find('[%z\1-\8\11\12\14-\31]') then fail(key, 'invalid XML text') end
+        if key ~= 'seed' and value:find('[%z\1-\8\11\12\14-\31]') then fail(key, 'invalid XML text') end
         prng.hash(value)
       elseif spec.type == 'number' then number(key, value, spec)
       elseif spec.type == 'enum' then
@@ -117,31 +123,33 @@ function M.resolve(style, input)
       result[key] = value
     end
   end
-  -- Resolve background first: base colors avoid it when another choice exists.
-  for _, name in ipairs({'background', 'base'}) do
-    local key = name .. 'Color'
-    local values = input[key]
-    if values == nil then values = schema[key].palette end
-    if type(values) == 'string' then values = {values} end
-    list(key, values)
-    local candidates = {}
-    for _, value in ipairs(values) do candidates[#candidates + 1] = hex(key, value) end
-    if name == 'base' and result.backgroundColor then
-      local filtered = {}
-      for _, value in ipairs(candidates) do
-        if value:sub(1, 7) ~= result.backgroundColor:sub(1, 7) then filtered[#filtered + 1] = value end
-      end
-      if #filtered > 0 then candidates = filtered end
+  local palettes = {}
+  for key, spec in pairs(schema) do
+    if spec.type == 'color' then
+      local name = key:sub(1, -6)
+      local values = input[key]
+      if values == nil then values = schema[key].palette end
+      if type(values) == 'string' then values = {values} end
+      list(key, values)
+      local candidates = {}
+      for _, value in ipairs(values) do candidates[#candidates + 1] = hex(key, value) end
+      palettes[name] = candidates
     end
-    result[key] = prng.shuffle(seed, key, candidates)[1] or false
   end
-  for name, component in pairs(style.components) do
+  for name, value in pairs(colors.resolve(style, palettes, seed)) do
+    result[name .. 'Color'] = value or {}
+  end
+  for name, entry in pairs(style.components or {}) do
+    local component = entry.extends and style.components[entry.extends] or entry
     local pk, vk = name .. 'Probability', name .. 'Variant'
     local probability = input[pk]
+    if probability == nil and entry.extends then probability = input[entry.extends .. 'Probability'] end
     if probability == nil then probability = schema[pk].default end
     number(pk, probability, schema[pk])
     local weights = {}
-    if input[vk] ~= nil then weights = variants(vk, input[vk], component)
+    local selection = input[vk]
+    if selection == nil and entry.extends then selection = input[entry.extends .. 'Variant'] end
+    if selection ~= nil then weights = variants(vk, selection, component)
     else
       for variant, data in pairs(component.variants) do weights[variant] = data.weight or 1 end
     end
@@ -150,10 +158,6 @@ function M.resolve(style, input)
     result[pk] = visible and 100 or 0
     -- Keep a hidden part's selection so the editor can enable it later.
     result[vk] = variant or {}
-  end
-  -- Empty arrays are portable and round-trip through this same public API.
-  for _, key in ipairs({'backgroundColor', 'baseColor'}) do
-    if result[key] == false then result[key] = {} end
   end
   return result
 end

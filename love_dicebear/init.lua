@@ -1,14 +1,17 @@
 local options = require('love_dicebear.options')
 local renderer = require('love_dicebear.renderer')
 local util = require('love_dicebear.util')
-local M = {version = '0.1.0'}
+local M = {version = '0.2.0'}
+local names = require('love_dicebear.styles.registry')
+local available = {}
+for _, name in ipairs(names) do available[name] = true end
 
 local function style(name)
-  assert(name == 'bottts', 'unsupported style: ' .. tostring(name) .. ' (available: bottts)')
-  return require('love_dicebear.styles.bottts')
+  assert(available[name], 'unsupported style: ' .. tostring(name) .. ' (see dicebear.styles())')
+  return require('love_dicebear.styles.' .. name)
 end
 
-function M.styles() return {'bottts'} end
+function M.styles() return util.copy(names) end
 
 function M.describe(name)
   local definition = style(name)

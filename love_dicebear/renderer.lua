@@ -3,22 +3,29 @@ local prng = require('love_dicebear.prng')
 local M = {}
 local esc, num = util.escape, util.number
 
-local function metadata(meta)
-  local source, creator, license = meta.source, meta.creator, meta.license
-  local rights = 'Remix of “' .. source.name .. '” (' .. source.url .. ') by “'
-    .. creator.name .. '”, licensed under “' .. license.name .. '” (' .. license.url .. ')'
-  return '<metadata xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"'
-    .. ' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"'
-    .. ' xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/">'
-    .. '<rdf:RDF><rdf:Description><dc:title>' .. esc(source.name) .. '</dc:title>'
-    .. '<dc:creator>' .. esc(creator.name) .. '</dc:creator>'
-    .. '<dc:source xsi:type="dcterms:URI">' .. esc(source.url) .. '</dc:source>'
-    .. '<dcterms:license xsi:type="dcterms:URI">' .. esc(license.url) .. '</dcterms:license>'
-    .. '<dc:rights>' .. esc(rights) .. '</dc:rights></rdf:Description></rdf:RDF></metadata>'
+local metadata = require('love_dicebear.metadata')
+local initials = require('love_dicebear.initials')
+
+local function componentTransform(component, name, seed)
+  local translate = component.translate or {}
+  local x = prng.float(seed, name .. 'TranslateX', translate.x, 0) / 100 * component.width
+  local y = prng.float(seed, name .. 'TranslateY', translate.y, 0) / 100 * component.height
+  local rotate = prng.float(seed, name .. 'Rotate', component.rotate, 0)
+  local scale = prng.float(seed, name .. 'Scale', component.scale, 1)
+  local cx, cy = num(component.width / 2), num(component.height / 2)
+  local transforms = {}
+  if x ~= 0 or y ~= 0 then transforms[#transforms + 1] = 'translate(' .. num(x) .. ', ' .. num(y) .. ')' end
+  if rotate ~= 0 then transforms[#transforms + 1] = 'rotate(' .. num(rotate) .. ', ' .. cx .. ', ' .. cy .. ')' end
+  if scale ~= 1 then
+    transforms[#transforms + 1] = 'translate(' .. cx .. ', ' .. cy .. ') scale(' .. num(scale)
+      .. ') translate(' .. num(-component.width / 2) .. ', ' .. num(-component.height / 2) .. ')'
+  end
+  return table.concat(transforms, ' ')
 end
 
 function M.render(style, options)
-  local hash = string.format('%08x', prng.hash(style.meta.source.name .. ':' .. options.seed))
+  local sourceName = ((style.meta or {}).source or {}).name or ''
+  local hash = string.format('%08x', prng.hash(sourceName .. ':' .. options.seed))
   local defs, order = {}, {}
   local function define(id, svg)
     if not defs[id] then order[#order + 1] = id end
@@ -28,14 +35,26 @@ function M.render(style, options)
     local value = options[name .. 'Color']
     return type(value) == 'string' and value or 'none'
   end
+  local cachedInitials
+  local function variable(name)
+    if name == 'fontFamily' then return options.fontFamily end
+    if name == 'fontWeight' then return num(options.fontWeight) end
+    cachedInitials = cachedInitials or initials.fromSeed(options.seed)
+    if name == 'initials' then return cachedInitials end
+    if name == 'initial' then return initials.first(cachedInitials) end
+    error('unsupported bundled variable: ' .. tostring(name))
+  end
+  local function valueOf(value)
+    if type(value) ~= 'table' then return value end
+    if value.type == 'color' then return color(value.name) end
+    if value.type == 'variable' then return variable(value.name) end
+    error('unsupported bundled value reference')
+  end
   local function attrs(attributes)
     local result = {}
     for _, pair in ipairs(attributes or {}) do
       local key, value = pair[1], pair[2]
-      if type(value) == 'table' then
-        assert(value.type == 'color', 'unsupported bundled attribute reference')
-        value = color(value.name)
-      end
+      value = valueOf(value)
       result[#result + 1] = ' ' .. key .. '="' .. esc(value) .. '"'
     end
     return table.concat(result)
@@ -48,15 +67,31 @@ function M.render(style, options)
   end
   function render(element)
     local name = element.name
+    if element.type == 'text' then return esc(valueOf(element.value) or '') end
     if element.type == 'component' then
       if options[name .. 'Probability'] == 0 then return '' end
       local variant = options[name .. 'Variant']
-      local id = name .. '-' .. variant .. '-' .. hash
+      local entry = style.components[name]
+      local source = entry.extends or name
+      local component = style.components[source]
+      local id = source .. '-' .. variant .. '-' .. hash
       if not defs[id] then
-        local body = elements(style.components[name].variants[variant].elements)
+        local body = elements(component.variants[variant].elements)
         define(id, '<g id="' .. id .. '">' .. body .. '</g>')
       end
-      return '<use' .. attrs(element.attributes) .. ' href="#' .. id .. '"/>'
+      local attributes = util.copy(element.attributes or {})
+      local transform = componentTransform(component, name, options.seed)
+      if transform ~= '' then
+        local found = false
+        for _, pair in ipairs(attributes) do
+          if pair[1] == 'transform' then
+            pair[2] = (pair[2] ~= '' and pair[2] .. ' ' or '') .. transform
+            found = true
+          end
+        end
+        if not found then attributes[#attributes + 1] = {'transform', transform} end
+      end
+      return '<use' .. attrs(attributes) .. ' href="#' .. id .. '"/>'
     end
     assert(element.type == 'element', 'unsupported bundled element type')
     if name == 'defs' then

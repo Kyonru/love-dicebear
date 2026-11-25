@@ -1,5 +1,10 @@
 # Third-party notices
 
+All bundled definitions and generated artwork retain their own license metadata.
+See [STYLES.md](STYLES.md) for each style's creator, license, and immutable source
+URL. The MIT code license does not replace these artwork licenses. Generated
+SVGs include the corresponding attribution and license metadata.
+
 ## Bottts artwork
 
 Bottts by **Pablo Stanley**, https://bottts.com/ — free for personal and
@@ -25,3 +30,10 @@ https://www.dicebear.com/create-styles/implement-dicebear-core/
 
 love-thorvg is an optional, separately installed dependency. Retain its own
 MIT and ThorVG notices when distributing its binaries.
+
+## Unicode data
+
+The initials implementation uses generated Unicode 17.0 letter/mark categories
+and uppercase mappings. See `vendor/UNICODE-LICENSE`. The generation script uses
+Node's Unicode implementation only at development time; the resulting tables
+are bundled for consistent behavior across Lua runtimes.

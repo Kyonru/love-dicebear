@@ -3,8 +3,8 @@ local prng = require('love_dicebear.prng')
 local directory = assert(arg[1], 'fixture directory required')
 local fixtures = assert(loadfile(directory .. '/cases.lua'))()
 for index, case in ipairs(fixtures) do
-  local svg, resolved = dicebear.generate('bottts', case)
-  assert(svg == dicebear.generate('bottts', resolved), 'round-trip failed for case ' .. index)
+  local svg, resolved = dicebear.generate(case.style, case.options)
+  assert(svg == dicebear.generate(case.style, resolved), 'round-trip failed for case ' .. index .. ' (' .. case.style .. ')')
   local file = assert(io.open(directory .. '/' .. index .. '.svg', 'wb'))
   file:write(svg); file:close()
 end

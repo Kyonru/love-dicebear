@@ -59,6 +59,16 @@ end
 
 function M.value(seed, key) return generator(M.hash(seed .. ':' .. key))() end
 
+function M.float(seed, key, range, fallback)
+  if not range then return fallback end
+  local lo, hi = math.min(range.min, range.max), math.max(range.min, range.max)
+  local step, raw = range.step or 0
+  if step > 0 then
+    raw = lo + math.floor(M.value(seed, key) * (math.floor((hi - lo) / step) + 1)) * step
+  else raw = lo + M.value(seed, key) * (hi - lo) end
+  return util.round(raw * 10000) / 10000
+end
+
 local function normalized(items)
   local seen, result = {}, {}
   for _, item in ipairs(items) do
